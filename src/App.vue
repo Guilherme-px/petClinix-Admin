@@ -3,5 +3,5 @@
 </template>
 
 <script setup lang="ts">
-import LoginPage from "./components/auth/LoginPage.vue";
+import LoginPage from "./pages/auth/LoginPage.vue";
 </script>

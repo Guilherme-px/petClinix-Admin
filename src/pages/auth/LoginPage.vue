@@ -27,8 +27,8 @@
 </template>
 
 <script lang="ts" setup>
-import AppLogo from "@/components/AppLogo.vue";
-import LoginForm from "@/components/auth/LoginForm.vue";
+import AppLogo from "../../components/AppLogo.vue";
+import LoginForm from "../../components/auth/LoginForm.vue";
 
 interface LoginPayload {
     email: string;
