@@ -1,5 +1,5 @@
 <template>
-    <q-form @submit="onSubmit" class="q-gutter-md">
+    <q-form @submit="onSubmit" class="q-gutter-md" data-test="login-form">
         <q-input
             outlined
             v-model="form.email"
@@ -7,6 +7,7 @@
             type="email"
             lazy-rules
             :rules="[required, emailFormat]"
+            data-test="email-input"
         >
             <template v-slot:prepend>
                 <q-icon name="email" />
@@ -20,6 +21,7 @@
             :type="isPwd ? 'password' : 'text'"
             lazy-rules
             :rules="[passwordRules]"
+            data-test="password-input"
         >
             <template v-slot:prepend>
                 <q-icon name="lock" />
@@ -42,6 +44,7 @@
                 color="primary"
                 class="btn-access"
                 :loading="isLoading"
+                data-test="submit-btn"
             />
         </div>
     </q-form>
