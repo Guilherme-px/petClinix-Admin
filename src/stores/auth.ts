@@ -38,8 +38,8 @@ export const useAuthStore = defineStore("auth", () => {
     }
 
     function persistTokens() {
-        if (token.value) localStorage.setItem("token", token.value);
-        if (refreshToken.value) localStorage.setItem("refreshToken", refreshToken.value);
+        localStorage.setItem("token", token.value!);
+        localStorage.setItem("refreshToken", refreshToken.value!);
     }
 
     function clearTokens() {
