@@ -20,23 +20,40 @@
 
                 <div class="text-h5 text-weight-bold text-primary q-mb-xl">Acesse sua conta</div>
 
-                <LoginForm @submit="handleLogin" />
+                <LoginForm @submit="handleLogin" :isLoading="isLoading" />
             </div>
         </div>
     </div>
 </template>
 
 <script lang="ts" setup>
-import AppLogo from "../../components/AppLogo.vue";
-import LoginForm from "../../components/auth/LoginForm.vue";
+import { ref } from "vue";
+import AppLogo from "@/components/AppLogo.vue";
+import LoginForm from "@/components/auth/LoginForm.vue";
+import { useAuthStore } from "@/stores/auth";
+import { useQuasar } from "quasar";
+import type { LoginPayload } from "@/domain/models/Auth";
+import type { FetchError } from "@/infrastructure/http/errorHandler";
 
-interface LoginPayload {
-    email: string;
-    password: string;
-}
+const $q = useQuasar();
+const authStore = useAuthStore();
+const isLoading = ref(false);
 
-const handleLogin = (payload: LoginPayload) => {
-    return payload
+const handleLogin = async (payload: LoginPayload) => {
+    isLoading.value = true;
+    try {
+        await authStore.login(payload);
+
+        $q.notify({ type: "positive", message: "Login realizado com sucesso!" });
+    } catch (error: unknown) {
+        const fetchError = error as FetchError;
+        $q.notify({
+            type: "negative",
+            message: fetchError.data?.errorMessage || fetchError.message || "Erro ao fazer login.",
+        });
+    } finally {
+        isLoading.value = false;
+    }
 };
 </script>
 

@@ -43,7 +43,7 @@
                 type="submit"
                 color="primary"
                 class="btn-access"
-                :loading="isLoading"
+                :loading="props.isLoading"
                 data-test="submit-btn"
             />
         </div>
@@ -59,13 +59,16 @@ interface LoginFormPayload {
     password: string;
 }
 
+const props = defineProps<{
+    isLoading?: boolean;
+}>();
+
 const emit = defineEmits<{
     (e: "submit", payload: LoginFormPayload): void;
 }>();
 
 const { required, emailFormat, passwordRules } = useValidations();
 
-const isLoading = ref(false);
 const isPwd = ref(true);
 
 const form = reactive<LoginFormPayload>({
@@ -74,12 +77,7 @@ const form = reactive<LoginFormPayload>({
 });
 
 const onSubmit = () => {
-    isLoading.value = true;
     emit("submit", { ...form });
-
-    setTimeout(() => {
-        isLoading.value = false;
-    }, 1500);
 };
 </script>
 
