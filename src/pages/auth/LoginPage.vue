@@ -34,9 +34,11 @@ import { useAuthStore } from "@/stores/auth";
 import { useQuasar } from "quasar";
 import type { LoginPayload } from "@/domain/models/Auth";
 import type { FetchError } from "@/infrastructure/http/errorHandler";
+import { useRouter } from "vue-router";
 
 const $q = useQuasar();
 const authStore = useAuthStore();
+const router = useRouter();
 const isLoading = ref(false);
 
 const handleLogin = async (payload: LoginPayload) => {
@@ -45,6 +47,7 @@ const handleLogin = async (payload: LoginPayload) => {
         await authStore.login(payload);
 
         $q.notify({ type: "positive", message: "Login realizado com sucesso!" });
+        router.push("/appointments");
     } catch (error: unknown) {
         const fetchError = error as FetchError;
         $q.notify({
