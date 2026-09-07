@@ -17,15 +17,28 @@ export const useAuthStore = defineStore("auth", () => {
         );
 
         const result = await authService.login(payload);
+        setAuthData(result);
+    }
 
+    async function doRefreshToken(): Promise<string | null> {
+        if (!refreshToken.value) return null;
+        try {
+            const authService = container.resolve<{
+                refreshToken: (t: string) => Promise<AuthResult>;
+            }>("AuthService");
+            const result = await authService.refreshToken(refreshToken.value);
+            setAuthData(result);
+            return result.token;
+        } catch {
+            logout();
+            return null;
+        }
+    }
+
+    function setAuthData(result: AuthResult) {
         token.value = result.token;
         refreshToken.value = result.refreshToken;
-
-        user.value = {
-            email: result.email,
-            role: result.role,
-        } as User;
-
+        user.value = { email: result.email, role: result.role } as User;
         persistTokens();
     }
 
@@ -55,5 +68,6 @@ export const useAuthStore = defineStore("auth", () => {
         userRole,
         login,
         logout,
+        doRefreshToken,
     };
 });
