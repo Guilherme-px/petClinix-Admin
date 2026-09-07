@@ -12,4 +12,8 @@ export class AuthRepository implements IAuthRepository {
     async login(payload: LoginPayload): Promise<AuthResult> {
         return this.httpClient.post<AuthResult>("/api/users/login", payload);
     }
+
+    async refreshToken(refreshToken: string): Promise<AuthResult> {
+        return this.httpClient.post<AuthResult>("/api/users/refresh", { refreshToken });
+    }
 }

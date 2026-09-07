@@ -6,6 +6,11 @@ export const createAuthService = (authRepository: IAuthRepository) => {
         async login(payload: LoginPayload): Promise<AuthResult> {
             return await authRepository.login(payload);
         },
+
+        async refreshToken(token: string): Promise<AuthResult> {
+            console.log("renovando...", token);
+            return await authRepository.refreshToken(token);
+        },
     };
 };
 
