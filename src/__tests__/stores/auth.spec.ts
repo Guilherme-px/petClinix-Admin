@@ -26,6 +26,7 @@ describe("useAuthStore", () => {
                 email: "admin@petclinix.com",
                 role: "Admin",
             }),
+            refreshToken: vi.fn<(token: string) => Promise<AuthResult>>().mockResolvedValue({} as AuthResult),
         };
 
         (container.resolve as ReturnType<typeof vi.fn>).mockReturnValue(mockAuthService);
@@ -43,6 +44,51 @@ describe("useAuthStore", () => {
         expect(localStorage.getItem("refreshToken")).toBe("fake-refresh");
     });
 
+    it("should refresh token successfully", async () => {
+        const mockAuthService = {
+            login: vi.fn<(payload: LoginPayload) => Promise<AuthResult>>(),
+            refreshToken: vi.fn<(token: string) => Promise<AuthResult>>().mockResolvedValue({
+                token: "new-token",
+                refreshToken: "new-refresh",
+                email: "admin@petclinix.com",
+                role: "Admin",
+            }),
+        };
+
+        (container.resolve as ReturnType<typeof vi.fn>).mockReturnValue(mockAuthService);
+
+        const store = useAuthStore();
+        store.refreshToken = "old-refresh";
+
+        const newToken = await store.doRefreshToken();
+
+        expect(newToken).toBe("new-token");
+        expect(store.token).toBe("new-token");
+        expect(store.refreshToken).toBe("new-refresh");
+        expect(localStorage.getItem("token")).toBe("new-token");
+    });
+
+    it("should logout if refresh token fails", async () => {
+        const mockAuthService = {
+            login: vi.fn<(payload: LoginPayload) => Promise<AuthResult>>(),
+            refreshToken: vi.fn<(token: string) => Promise<AuthResult>>().mockRejectedValue(new Error("Refresh failed")),
+        };
+
+        (container.resolve as ReturnType<typeof vi.fn>).mockReturnValue(mockAuthService);
+
+        const store = useAuthStore();
+        store.token = "expired-token";
+        store.refreshToken = "old-refresh";
+
+        const newToken = await store.doRefreshToken();
+
+        expect(newToken).toBeNull();
+        expect(store.token).toBeNull();
+        expect(store.refreshToken).toBeNull();
+        expect(store.isAuthenticated).toBe(false);
+        expect(localStorage.getItem("token")).toBeNull();
+    });
+
     it("should logout and clear state", async () => {
         const mockAuthService = {
             login: vi.fn<(payload: LoginPayload) => Promise<AuthResult>>().mockResolvedValue({
@@ -51,6 +97,7 @@ describe("useAuthStore", () => {
                 email: "admin@petclinix.com",
                 role: "Admin",
             }),
+            refreshToken: vi.fn<(token: string) => Promise<AuthResult>>(),
         };
 
         (container.resolve as ReturnType<typeof vi.fn>).mockReturnValue(mockAuthService);
@@ -66,5 +113,23 @@ describe("useAuthStore", () => {
         expect(store.isAuthenticated).toBe(false);
         expect(store.userRole).toBeNull();
         expect(localStorage.getItem("token")).toBeNull();
+    });
+
+        it("should return null if no refresh token exists", async () => {
+        const mockAuthService = {
+            login: vi.fn<(payload: LoginPayload) => Promise<AuthResult>>(),
+            refreshToken: vi.fn<(token: string) => Promise<AuthResult>>(),
+        };
+
+        (container.resolve as ReturnType<typeof vi.fn>).mockReturnValue(mockAuthService);
+
+        const store = useAuthStore();
+
+        store.refreshToken = null;
+
+        const result = await store.doRefreshToken();
+
+        expect(result).toBeNull();
+        expect(mockAuthService.refreshToken).not.toHaveBeenCalled();
     });
 });
