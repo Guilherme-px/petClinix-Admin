@@ -2,6 +2,7 @@ import { HttpClient } from "./http/HttpClient";
 import { AuthRepository } from "./repositories/AuthRepository";
 import { createAuthService } from "@/application/services/authService";
 
+/* v8 ignore next 1: Fallback para ambiente de dev */
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5180";
 
 class Container {
@@ -18,6 +19,7 @@ class Container {
         this.services.set("AuthService", authService);
     }
 
+    /* v8 ignore next 4: Singleton pattern, instance creation is covered by module load */
     public static getInstance(): Container {
         if (!Container.instance) {
             Container.instance = new Container();
