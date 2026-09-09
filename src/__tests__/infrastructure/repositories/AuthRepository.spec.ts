@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { AuthRepository } from "../../../infrastructure/repositories/AuthRepository";
 import { HttpClient } from "../../../infrastructure/http/HttpClient";
-import type { AuthResult } from "../../../domain/models/Auth";
+import type { AuthResult, User } from "../../../domain/models/Auth";
 
 describe("AuthRepository", () => {
     let httpClientMock: HttpClient;
@@ -10,6 +10,7 @@ describe("AuthRepository", () => {
     beforeEach(() => {
         httpClientMock = {
             post: vi.fn<(url: string, data: unknown) => Promise<AuthResult>>(),
+            get: vi.fn<(url: string) => Promise<User>>(),
         } as unknown as HttpClient;
 
         authRepository = new AuthRepository(httpClientMock);
@@ -47,5 +48,21 @@ describe("AuthRepository", () => {
 
         expect(httpClientMock.post).toHaveBeenCalledWith("/api/users/refresh", { refreshToken });
         expect(result).toEqual(mockResult);
+    });
+
+    it("should call getProfile endpoint and return user data", async () => {
+        const mockUser: User = {
+            id: "123",
+            name: "Test User",
+            email: "test@test.com",
+            role: "Admin",
+        };
+
+        vi.mocked(httpClientMock.get).mockResolvedValue(mockUser);
+
+        const result = await authRepository.getProfile();
+
+        expect(httpClientMock.get).toHaveBeenCalledWith("/api/users/me");
+        expect(result).toEqual(mockUser);
     });
 });
