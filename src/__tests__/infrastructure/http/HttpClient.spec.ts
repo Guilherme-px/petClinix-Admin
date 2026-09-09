@@ -8,6 +8,7 @@ type MockAxios = Mock & {
         response: { use: Mock };
     };
     post: Mock;
+    get: Mock;
 };
 
 vi.mock("axios", () => {
@@ -17,6 +18,7 @@ vi.mock("axios", () => {
         response: { use: vi.fn<() => void>() },
     };
     instance.post = vi.fn<() => Promise<unknown>>();
+    instance.get = vi.fn<() => Promise<unknown>>();
     return {
         default: {
             create: vi.fn<() => MockAxios>(() => instance),
@@ -41,8 +43,10 @@ describe("HttpClient", () => {
     });
 
     const getRequestInterceptor = () => mockInstance.interceptors.request.use.mock.calls[0][0];
-    const getResponseSuccessInterceptor = () => mockInstance.interceptors.response.use.mock.calls[0][0];
-    const getResponseErrorInterceptor = () => mockInstance.interceptors.response.use.mock.calls[0][1];
+    const getResponseSuccessInterceptor = () =>
+        mockInstance.interceptors.response.use.mock.calls[0][0];
+    const getResponseErrorInterceptor = () =>
+        mockInstance.interceptors.response.use.mock.calls[0][1];
 
     it("should be created with baseURL", () => {
         expect(axios.create).toHaveBeenCalledWith({ baseURL: "http://test.com" });
@@ -78,6 +82,12 @@ describe("HttpClient", () => {
         const error = new Error("Network Error");
         mockInstance.post.mockRejectedValue(error);
         await expect(client.post("/api", {})).rejects.toThrow("Network Error");
+    });
+
+    it("should throw error on get failure", async () => {
+        const error = new Error("Network Error");
+        mockInstance.get.mockRejectedValue(error);
+        await expect(client.get("/api")).rejects.toThrow("Network Error");
     });
 
     it("should handle 401 by refreshing token and retrying request", async () => {
@@ -156,7 +166,9 @@ describe("HttpClient", () => {
     });
 
     it("should reject if refresh fails and logoutFn is not set", async () => {
-        const refreshFn = vi.fn<() => Promise<string | null>>().mockRejectedValue(new Error("Refresh failed"));
+        const refreshFn = vi
+            .fn<() => Promise<string | null>>()
+            .mockRejectedValue(new Error("Refresh failed"));
 
         (client as unknown as { refreshFn: () => Promise<string | null> }).refreshFn = refreshFn;
 
@@ -164,5 +176,12 @@ describe("HttpClient", () => {
         const interceptor = getResponseErrorInterceptor();
 
         await expect(interceptor(error401)).rejects.toThrow("Refresh failed");
+    });
+
+    it("should make get request and return data", async () => {
+        mockInstance.get.mockResolvedValue({ data: { success: true } });
+        const result = await client.get("/api/users/me");
+        expect(mockInstance.get).toHaveBeenCalledWith("/api/users/me");
+        expect(result).toEqual({ success: true });
     });
 });
