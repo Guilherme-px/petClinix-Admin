@@ -15,19 +15,40 @@ const router = createRouter({
             meta: { guestOnly: true },
         },
         {
-            path: "/appointments",
-            name: "appointments",
-            component: () => import("@/pages/AppointmentsPage.vue"),
+            path: "/",
+            component: () => import("@/layouts/AdminLayout.vue"),
             meta: { requiresAuth: true },
+            children: [
+                {
+                    path: "appointments",
+                    name: "appointments",
+                    component: () => import("@/pages/AppointmentsPage.vue"),
+                },
+            ],
+        },
+        {
+            path: "/:catchAll(.*)*",
+            redirect: "/appointments",
         },
     ],
 });
 
-router.beforeEach((to) => {
+router.beforeEach(async (to) => {
     const authStore = useAuthStore();
 
-    if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-        return { name: "login" };
+    if (to.meta.requiresAuth) {
+        if (!authStore.isAuthenticated) {
+            return { name: "login" };
+        }
+
+        if (!authStore.user) {
+            try {
+                await authStore.fetchUser();
+            } catch {
+                authStore.logout();
+                return { name: "login" };
+            }
+        }
     }
 
     if (to.meta.guestOnly && authStore.isAuthenticated) {

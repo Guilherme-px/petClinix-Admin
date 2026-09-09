@@ -7,6 +7,7 @@ export const useAuthStore = defineStore("auth", () => {
     const token = ref<string | null>(localStorage.getItem("token"));
     const refreshToken = ref<string | null>(localStorage.getItem("refreshToken"));
     const user = ref<User | null>(null);
+    const isAuthenticating = ref(false);
 
     const isAuthenticated = computed(() => !!token.value);
     const userRole = computed(() => user.value?.role || null);
@@ -15,7 +16,6 @@ export const useAuthStore = defineStore("auth", () => {
         const authService = container.resolve<{ login: (p: LoginPayload) => Promise<AuthResult> }>(
             "AuthService",
         );
-
         const result = await authService.login(payload);
         setAuthData(result);
     }
@@ -38,7 +38,10 @@ export const useAuthStore = defineStore("auth", () => {
     function setAuthData(result: AuthResult) {
         token.value = result.token;
         refreshToken.value = result.refreshToken;
-        user.value = { email: result.email, role: result.role } as User;
+        user.value = {
+            email: result.email,
+            role: result.role,
+        } as User;
         persistTokens();
     }
 
@@ -46,7 +49,6 @@ export const useAuthStore = defineStore("auth", () => {
         token.value = null;
         refreshToken.value = null;
         user.value = null;
-
         clearTokens();
     }
 
@@ -60,14 +62,35 @@ export const useAuthStore = defineStore("auth", () => {
         localStorage.removeItem("refreshToken");
     }
 
+    async function fetchUser(): Promise<void> {
+        if (!token.value) return;
+
+        isAuthenticating.value = true;
+        try {
+            const authService = container.resolve<{ getProfile: () => Promise<User> }>(
+                "AuthService",
+            );
+            user.value = await authService.getProfile();
+        } catch (error) {
+            if (!token.value) {
+                user.value = null;
+            }
+            throw error;
+        } finally {
+            isAuthenticating.value = false;
+        }
+    }
+
     return {
         token,
         refreshToken,
         user,
         isAuthenticated,
         userRole,
+        isAuthenticating,
         login,
         logout,
         doRefreshToken,
+        fetchUser,
     };
 });
