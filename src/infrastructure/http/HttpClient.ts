@@ -61,6 +61,15 @@ export class HttpClient {
         this.logoutFn = logoutFn;
     }
 
+    async get<T>(url: string): Promise<T> {
+        try {
+            const response = await this.instance.get<T>(url);
+            return response.data;
+        } catch (error: unknown) {
+            throw errorHandler(error);
+        }
+    }
+
     async post<T, TRequest = unknown>(url: string, data: TRequest): Promise<T> {
         try {
             const response = await this.instance.post<T>(url, data);

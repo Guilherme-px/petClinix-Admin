@@ -1,5 +1,5 @@
 import type { IAuthRepository } from "@/domain/repositories/IAuthRepository";
-import type { LoginPayload, AuthResult } from "@/domain/models/Auth";
+import type { LoginPayload, AuthResult, User } from "@/domain/models/Auth";
 import { HttpClient } from "@/infrastructure/http/HttpClient";
 
 export class AuthRepository implements IAuthRepository {
@@ -15,5 +15,9 @@ export class AuthRepository implements IAuthRepository {
 
     async refreshToken(refreshToken: string): Promise<AuthResult> {
         return this.httpClient.post<AuthResult>("/api/users/refresh", { refreshToken });
+    }
+
+    async getProfile(): Promise<User> {
+        return this.httpClient.get<User>("/api/users/me");
     }
 }

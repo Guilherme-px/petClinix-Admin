@@ -1,5 +1,5 @@
 import type { IAuthRepository } from "@/domain/repositories/IAuthRepository";
-import type { LoginPayload, AuthResult } from "@/domain/models/Auth";
+import type { LoginPayload, AuthResult, User } from "@/domain/models/Auth";
 
 export const createAuthService = (authRepository: IAuthRepository) => {
     return {
@@ -9,6 +9,10 @@ export const createAuthService = (authRepository: IAuthRepository) => {
 
         async refreshToken(token: string): Promise<AuthResult> {
             return await authRepository.refreshToken(token);
+        },
+
+        async getProfile(): Promise<User> {
+            return await authRepository.getProfile();
         },
     };
 };
