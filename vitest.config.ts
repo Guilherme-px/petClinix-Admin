@@ -18,6 +18,7 @@ export default mergeConfig(
                     "**/node_modules/**",
                     "**/dist/**",
                     "e2e/**",
+                    "src/assets/**",
                     "src/test/**",
                     "src/main.ts",
                     "vite.config.ts",
