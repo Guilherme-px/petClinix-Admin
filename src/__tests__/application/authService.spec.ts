@@ -18,6 +18,8 @@ describe("authService", () => {
         role: "Admin",
     };
 
+    const mockResetToken = "fake-reset-token";
+
     const mockRepo: IAuthRepository = {
         login: vi
             .fn<(payload: LoginPayload) => Promise<AuthResult>>()
@@ -26,6 +28,9 @@ describe("authService", () => {
             .fn<(token: string) => Promise<AuthResult>>()
             .mockResolvedValue(mockAuthResult),
         getProfile: vi.fn<() => Promise<User>>().mockResolvedValue(mockUser),
+        requestPasswordReset: vi
+            .fn<(email: string) => Promise<string>>()
+            .mockResolvedValue(mockResetToken),
     };
 
     it("should call repository login and return result", async () => {
@@ -53,5 +58,13 @@ describe("authService", () => {
 
         expect(mockRepo.getProfile).toHaveBeenCalled();
         expect(result).toEqual(mockUser);
+    });
+
+    it("should call repository requestPasswordReset and return token", async () => {
+        const service = createAuthService(mockRepo);
+        const result = await service.requestPasswordReset("admin@petclinix.com");
+
+        expect(mockRepo.requestPasswordReset).toHaveBeenCalledWith("admin@petclinix.com");
+        expect(result).toBe(mockResetToken);
     });
 });
