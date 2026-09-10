@@ -217,4 +217,31 @@ describe("useAuthStore", () => {
         expect(store.user).toBeNull();
         expect(store.isAuthenticating).toBe(false);
     });
+
+    it("should call requestPasswordReset successfully", async () => {
+        const mockAuthService = {
+            login: vi.fn<(payload: LoginPayload) => Promise<AuthResult>>(),
+            refreshToken: vi.fn<(token: string) => Promise<AuthResult>>(),
+            getProfile: vi.fn<() => Promise<User>>(),
+            requestPasswordReset: vi
+                .fn<(email: string) => Promise<string>>()
+                .mockResolvedValue("fake-reset-token"),
+        };
+
+        (container.resolve as ReturnType<typeof vi.fn>).mockReturnValue(mockAuthService);
+
+        const store = useAuthStore();
+
+        const consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+
+        await store.requestPasswordReset("test@test.com");
+
+        expect(mockAuthService.requestPasswordReset).toHaveBeenCalledWith("test@test.com");
+        expect(consoleLogSpy).toHaveBeenCalledWith(
+            "Password reset token (Demo Mode):",
+            "fake-reset-token",
+        );
+
+        consoleLogSpy.mockRestore();
+    });
 });
