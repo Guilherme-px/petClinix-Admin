@@ -36,7 +36,14 @@
         </q-input>
 
         <div class="row justify-between items-center q-mt-md">
-            <q-btn flat dense color="primary text-bold" label="Esqueceu a senha?" size="sm" />
+            <q-btn
+                flat
+                dense
+                color="primary text-bold"
+                label="Esqueceu a senha?"
+                size="sm"
+                to="/forgot-password"
+            />
             <q-btn
                 unelevated
                 label="Entrar"

@@ -15,6 +15,12 @@ const router = createRouter({
             meta: { guestOnly: true },
         },
         {
+            path: "/forgot-password",
+            name: "forgot-password",
+            component: () => import("@/pages/auth/ForgotPasswordPage.vue"),
+            meta: { guestOnly: true },
+        },
+        {
             path: "/",
             component: () => import("@/layouts/AdminLayout.vue"),
             meta: { requiresAuth: true },
