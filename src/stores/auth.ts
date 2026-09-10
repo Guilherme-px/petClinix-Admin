@@ -81,6 +81,14 @@ export const useAuthStore = defineStore("auth", () => {
         }
     }
 
+    async function requestPasswordReset(email: string): Promise<void> {
+        const authService = container.resolve<{
+            requestPasswordReset: (e: string) => Promise<string>;
+        }>("AuthService");
+        const token = await authService.requestPasswordReset(email);
+        console.log("Password reset token (Demo Mode):", token);
+    }
+
     return {
         token,
         refreshToken,
@@ -92,5 +100,6 @@ export const useAuthStore = defineStore("auth", () => {
         logout,
         doRefreshToken,
         fetchUser,
+        requestPasswordReset,
     };
 });
