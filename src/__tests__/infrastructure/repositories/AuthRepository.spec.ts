@@ -65,4 +65,16 @@ describe("AuthRepository", () => {
         expect(httpClientMock.get).toHaveBeenCalledWith("/api/users/me");
         expect(result).toEqual(mockUser);
     });
+
+    it("should call requestPasswordReset endpoint and return token", async () => {
+        const mockResponse = { token: "fake-reset-token" };
+        const email = "test@test.com";
+
+        vi.mocked(httpClientMock.get).mockResolvedValue(mockResponse);
+
+        const result = await authRepository.requestPasswordReset(email);
+
+        expect(httpClientMock.get).toHaveBeenCalledWith(`/api/users/${email}/generate-reset-token`);
+        expect(result).toBe("fake-reset-token");
+    });
 });
