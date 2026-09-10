@@ -20,4 +20,11 @@ export class AuthRepository implements IAuthRepository {
     async getProfile(): Promise<User> {
         return this.httpClient.get<User>("/api/users/me");
     }
+
+    async requestPasswordReset(email: string): Promise<string> {
+        const response = await this.httpClient.get<{ token: string }>(
+            `/api/users/${email}/generate-reset-token`,
+        );
+        return response.token;
+    }
 }

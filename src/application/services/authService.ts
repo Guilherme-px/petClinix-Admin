@@ -14,6 +14,10 @@ export const createAuthService = (authRepository: IAuthRepository) => {
         async getProfile(): Promise<User> {
             return await authRepository.getProfile();
         },
+
+        async requestPasswordReset(email: string): Promise<string> {
+            return await authRepository.requestPasswordReset(email);
+        },
     };
 };
 
