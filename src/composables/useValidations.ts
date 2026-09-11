@@ -17,9 +17,14 @@ export const useValidations = () => {
         return true;
     };
 
+    const confirmPasswordRules = (compareValue: string) => {
+        return (val: string) => val === compareValue || "As senhas não coincidem.";
+    };
+
     return {
         required,
         emailFormat,
         passwordRules,
+        confirmPasswordRules,
     };
 };
