@@ -18,6 +18,10 @@ export const createAuthService = (authRepository: IAuthRepository) => {
         async requestPasswordReset(email: string): Promise<string> {
             return await authRepository.requestPasswordReset(email);
         },
+
+        async setPassword(token: string, password: string): Promise<void> {
+            return await authRepository.setPassword(token, password);
+        },
     };
 };
 

@@ -89,6 +89,13 @@ export const useAuthStore = defineStore("auth", () => {
         console.log("Password reset token (Demo Mode):", token);
     }
 
+    async function setPassword(token: string, password: string): Promise<void> {
+        const authService = container.resolve<{
+            setPassword: (t: string, p: string) => Promise<void>;
+        }>("AuthService");
+        await authService.setPassword(token, password);
+    }
+
     return {
         token,
         refreshToken,
@@ -101,5 +108,6 @@ export const useAuthStore = defineStore("auth", () => {
         doRefreshToken,
         fetchUser,
         requestPasswordReset,
+        setPassword,
     };
 });
