@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { useValidations } from "../../composables/useValidations";
 
 describe("useValidations", () => {
-    const { required, emailFormat, passwordRules } = useValidations();
+    const { required, emailFormat, passwordRules, confirmPasswordRules } = useValidations();
 
     it("required should return message if empty and true if filled", () => {
         expect(required("")).toBe("Campo obrigatório");
@@ -20,5 +20,12 @@ describe("useValidations", () => {
         expect(passwordRules("12345678")).toBe("Deve conter pelo menos uma letra maiúscula");
         expect(passwordRules("12345678A")).toBe("Deve conter pelo menos um caractere especial");
         expect(passwordRules("12345678A@")).toBe(true);
+    });
+
+    it("confirmPasswordRules should validate if passwords match", () => {
+        const validateConfirm = confirmPasswordRules("Password@123");
+
+        expect(validateConfirm("Password@123")).toBe(true);
+        expect(validateConfirm("DifferentPass@")).toBe("As senhas não coincidem.");
     });
 });
