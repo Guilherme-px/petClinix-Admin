@@ -31,6 +31,9 @@ describe("authService", () => {
         requestPasswordReset: vi
             .fn<(email: string) => Promise<string>>()
             .mockResolvedValue(mockResetToken),
+        setPassword: vi
+            .fn<(token: string, password: string) => Promise<void>>()
+            .mockResolvedValue(undefined),
     };
 
     it("should call repository login and return result", async () => {
@@ -66,5 +69,12 @@ describe("authService", () => {
 
         expect(mockRepo.requestPasswordReset).toHaveBeenCalledWith("admin@petclinix.com");
         expect(result).toBe(mockResetToken);
+    });
+
+    it("should call repository setPassword", async () => {
+        const service = createAuthService(mockRepo);
+        await service.setPassword("fake-reset-token", "NewPassword@123");
+
+        expect(mockRepo.setPassword).toHaveBeenCalledWith("fake-reset-token", "NewPassword@123");
     });
 });
