@@ -5,4 +5,5 @@ export interface IAuthRepository {
     refreshToken(refreshToken: string): Promise<AuthResult>;
     getProfile(): Promise<User>;
     requestPasswordReset(email: string): Promise<string>;
+    setPassword(token: string, password: string): Promise<void>;
 }

@@ -27,4 +27,8 @@ export class AuthRepository implements IAuthRepository {
         );
         return response.token;
     }
+
+    async setPassword(token: string, password: string): Promise<void> {
+        await this.httpClient.post<void>("/api/users/set-password", { token, password });
+    }
 }
