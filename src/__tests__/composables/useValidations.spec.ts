@@ -2,7 +2,8 @@ import { describe, it, expect } from "vitest";
 import { useValidations } from "../../composables/useValidations";
 
 describe("useValidations", () => {
-    const { required, emailFormat, passwordRules, confirmPasswordRules } = useValidations();
+    const { required, emailFormat, passwordRules, optionalPasswordRules, confirmPasswordRules } =
+        useValidations();
 
     it("required should return message if empty and true if filled", () => {
         expect(required("")).toBe("Campo obrigatório");
@@ -21,6 +22,16 @@ describe("useValidations", () => {
         expect(passwordRules("12345678A")).toBe("Deve conter pelo menos um caractere especial");
         expect(passwordRules("ABCD@(lks")).toBe("Deve conter pelo menos um número");
         expect(passwordRules("12345678A@")).toBe(true);
+    });
+
+    it("optionalPasswordRules should pass when empty and apply strength rules when filled", () => {
+        expect(optionalPasswordRules("")).toBe(true);
+        expect(optionalPasswordRules(undefined as unknown as string)).toBe(true);
+        expect(optionalPasswordRules("123")).toBe("A senha deve ter no mínimo 8 caracteres");
+        expect(optionalPasswordRules("12345678")).toBe("Deve conter pelo menos uma letra maiúscula");
+        expect(optionalPasswordRules("12345678A")).toBe("Deve conter pelo menos um caractere especial");
+        expect(optionalPasswordRules("ABCD@(lks")).toBe("Deve conter pelo menos um número");
+        expect(optionalPasswordRules("12345678A@")).toBe(true);
     });
 
     it("confirmPasswordRules should validate if passwords match", () => {
