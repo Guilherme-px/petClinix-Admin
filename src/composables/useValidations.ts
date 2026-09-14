@@ -12,6 +12,7 @@ export const useValidations = () => {
         if (!val) return "Senha é obrigatória";
         if (val.length < 8) return "A senha deve ter no mínimo 8 caracteres";
         if (!/[A-Z]/.test(val)) return "Deve conter pelo menos uma letra maiúscula";
+        if (!/[0-9]/.test(val)) return "Deve conter pelo menos um número";
         if (!/[!@#$%^&*(),.?":{}|<>]/.test(val))
             return "Deve conter pelo menos um caractere especial";
         return true;
