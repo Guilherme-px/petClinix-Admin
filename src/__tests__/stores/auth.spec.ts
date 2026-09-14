@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { setActivePinia, createPinia } from "pinia";
-import type { LoginPayload, AuthResult, User } from "../../domain/models/Auth";
+import type { LoginPayload, AuthResult, User, UpdateAccountPayload } from "../../domain/models/Auth";
 
 vi.mock("../../infrastructure/container", () => ({
     container: {
@@ -24,10 +24,19 @@ describe("useAuthStore", () => {
                 token: "fake-token",
                 refreshToken: "fake-refresh",
                 email: "admin@petclinix.com",
+                name: "Admin User",
                 role: "Admin",
             }),
             refreshToken: vi.fn<(token: string) => Promise<AuthResult>>().mockResolvedValue({} as AuthResult),
-            getProfile: vi.fn<() => Promise<User>>(),
+            getProfile: vi.fn<() => Promise<User>>().mockResolvedValue({
+                id: "123",
+                name: "Admin User",
+                email: "admin@petclinix.com",
+                role: "Admin",
+            }),
+            requestPasswordReset: vi.fn<(email: string) => Promise<string>>(),
+            setPassword: vi.fn<(token: string, password: string) => Promise<void>>(),
+            updateAccount: vi.fn<(payload: UpdateAccountPayload) => Promise<void>>(),
         };
 
         (container.resolve as ReturnType<typeof vi.fn>).mockReturnValue(mockAuthService);
@@ -52,9 +61,13 @@ describe("useAuthStore", () => {
                 token: "new-token",
                 refreshToken: "new-refresh",
                 email: "admin@petclinix.com",
+                name: "Admin User",
                 role: "Admin",
             }),
             getProfile: vi.fn<() => Promise<User>>(),
+            requestPasswordReset: vi.fn<(email: string) => Promise<string>>(),
+            setPassword: vi.fn<(token: string, password: string) => Promise<void>>(),
+            updateAccount: vi.fn<(payload: UpdateAccountPayload) => Promise<void>>(),
         };
 
         (container.resolve as ReturnType<typeof vi.fn>).mockReturnValue(mockAuthService);
@@ -75,6 +88,9 @@ describe("useAuthStore", () => {
             login: vi.fn<(payload: LoginPayload) => Promise<AuthResult>>(),
             refreshToken: vi.fn<(token: string) => Promise<AuthResult>>().mockRejectedValue(new Error("Refresh failed")),
             getProfile: vi.fn<() => Promise<User>>(),
+            requestPasswordReset: vi.fn<(email: string) => Promise<string>>(),
+            setPassword: vi.fn<(token: string, password: string) => Promise<void>>(),
+            updateAccount: vi.fn<(payload: UpdateAccountPayload) => Promise<void>>(),
         };
 
         (container.resolve as ReturnType<typeof vi.fn>).mockReturnValue(mockAuthService);
@@ -98,10 +114,19 @@ describe("useAuthStore", () => {
                 token: "fake-token",
                 refreshToken: "fake-refresh",
                 email: "admin@petclinix.com",
+                name: "Admin User",
                 role: "Admin",
             }),
             refreshToken: vi.fn<(token: string) => Promise<AuthResult>>(),
-            getProfile: vi.fn<() => Promise<User>>(),
+            getProfile: vi.fn<() => Promise<User>>().mockResolvedValue({
+                id: "123",
+                name: "Admin User",
+                email: "admin@petclinix.com",
+                role: "Admin",
+            }),
+            requestPasswordReset: vi.fn<(email: string) => Promise<string>>(),
+            setPassword: vi.fn<(token: string, password: string) => Promise<void>>(),
+            updateAccount: vi.fn<(payload: UpdateAccountPayload) => Promise<void>>(),
         };
 
         (container.resolve as ReturnType<typeof vi.fn>).mockReturnValue(mockAuthService);
@@ -124,6 +149,9 @@ describe("useAuthStore", () => {
             login: vi.fn<(payload: LoginPayload) => Promise<AuthResult>>(),
             refreshToken: vi.fn<(token: string) => Promise<AuthResult>>(),
             getProfile: vi.fn<() => Promise<User>>(),
+            requestPasswordReset: vi.fn<(email: string) => Promise<string>>(),
+            setPassword: vi.fn<(token: string, password: string) => Promise<void>>(),
+            updateAccount: vi.fn<(payload: UpdateAccountPayload) => Promise<void>>(),
         };
 
         (container.resolve as ReturnType<typeof vi.fn>).mockReturnValue(mockAuthService);
@@ -150,6 +178,9 @@ describe("useAuthStore", () => {
             login: vi.fn<(payload: LoginPayload) => Promise<AuthResult>>(),
             refreshToken: vi.fn<(token: string) => Promise<AuthResult>>(),
             getProfile: vi.fn<() => Promise<User>>().mockResolvedValue(mockUser),
+            requestPasswordReset: vi.fn<(email: string) => Promise<string>>(),
+            setPassword: vi.fn<(token: string, password: string) => Promise<void>>(),
+            updateAccount: vi.fn<(payload: UpdateAccountPayload) => Promise<void>>(),
         };
 
         (container.resolve as ReturnType<typeof vi.fn>).mockReturnValue(mockAuthService);
@@ -168,6 +199,9 @@ describe("useAuthStore", () => {
             login: vi.fn<(payload: LoginPayload) => Promise<AuthResult>>(),
             refreshToken: vi.fn<(token: string) => Promise<AuthResult>>(),
             getProfile: vi.fn<() => Promise<User>>(),
+            requestPasswordReset: vi.fn<(email: string) => Promise<string>>(),
+            setPassword: vi.fn<(token: string, password: string) => Promise<void>>(),
+            updateAccount: vi.fn<(payload: UpdateAccountPayload) => Promise<void>>(),
         };
 
         (container.resolve as ReturnType<typeof vi.fn>).mockReturnValue(mockAuthService);
@@ -185,6 +219,9 @@ describe("useAuthStore", () => {
             login: vi.fn<(payload: LoginPayload) => Promise<AuthResult>>(),
             refreshToken: vi.fn<(token: string) => Promise<AuthResult>>(),
             getProfile: vi.fn<() => Promise<User>>().mockRejectedValue(new Error("Network Error")),
+            requestPasswordReset: vi.fn<(email: string) => Promise<string>>(),
+            setPassword: vi.fn<(token: string, password: string) => Promise<void>>(),
+            updateAccount: vi.fn<(payload: UpdateAccountPayload) => Promise<void>>(),
         };
 
         (container.resolve as ReturnType<typeof vi.fn>).mockReturnValue(mockAuthService);
@@ -208,6 +245,9 @@ describe("useAuthStore", () => {
                 store.token = null;
                 return Promise.reject(new Error("401 Unauthorized"));
             }),
+            requestPasswordReset: vi.fn<(email: string) => Promise<string>>(),
+            setPassword: vi.fn<(token: string, password: string) => Promise<void>>(),
+            updateAccount: vi.fn<(payload: UpdateAccountPayload) => Promise<void>>(),
         };
 
         (container.resolve as ReturnType<typeof vi.fn>).mockReturnValue(mockAuthService);
@@ -226,6 +266,8 @@ describe("useAuthStore", () => {
             requestPasswordReset: vi
                 .fn<(email: string) => Promise<string>>()
                 .mockResolvedValue("fake-reset-token"),
+            setPassword: vi.fn<(token: string, password: string) => Promise<void>>(),
+            updateAccount: vi.fn<(payload: UpdateAccountPayload) => Promise<void>>(),
         };
 
         (container.resolve as ReturnType<typeof vi.fn>).mockReturnValue(mockAuthService);
@@ -254,6 +296,7 @@ describe("useAuthStore", () => {
             setPassword: vi
                 .fn<(token: string, password: string) => Promise<void>>()
                 .mockResolvedValue(undefined),
+            updateAccount: vi.fn<(payload: UpdateAccountPayload) => Promise<void>>(),
         };
 
         (container.resolve as ReturnType<typeof vi.fn>).mockReturnValue(mockAuthService);
@@ -266,5 +309,45 @@ describe("useAuthStore", () => {
             "fake-reset-token",
             "NewPassword@123",
         );
+    });
+
+    it("should call updateAccount successfully", async () => {
+        const mockPayload: UpdateAccountPayload = {
+            userName: "Updated Name",
+            userPhoneNumber: "11999998888",
+            userBirthDate: "1990-01-01",
+            newPassword: "NewPassword@123",
+            clinicTradeName: "Updated Clinic",
+            clinicLegalName: "Updated LLC",
+            clinicDocumentNumber: "12345678000199",
+            clinicEmail: "clinic@test.com",
+            clinicPhoneNumber: "11988887777",
+            clinicZipCode: "01001000",
+            clinicStreet: "Updated Street",
+            clinicNumber: "123",
+            clinicNeighborhood: "Center",
+            clinicComplement: "Apt 1",
+            clinicCity: "Sao Paulo",
+            clinicState: "SP",
+        };
+
+        const mockAuthService = {
+            login: vi.fn<(payload: LoginPayload) => Promise<AuthResult>>(),
+            refreshToken: vi.fn<(token: string) => Promise<AuthResult>>(),
+            getProfile: vi.fn<() => Promise<User>>(),
+            requestPasswordReset: vi.fn<(email: string) => Promise<string>>(),
+            setPassword: vi.fn<(token: string, password: string) => Promise<void>>(),
+            updateAccount: vi
+                .fn<(payload: UpdateAccountPayload) => Promise<void>>()
+                .mockResolvedValue(undefined),
+        };
+
+        (container.resolve as ReturnType<typeof vi.fn>).mockReturnValue(mockAuthService);
+
+        const store = useAuthStore();
+
+        await store.updateAccount(mockPayload);
+
+        expect(mockAuthService.updateAccount).toHaveBeenCalledWith(mockPayload);
     });
 });
