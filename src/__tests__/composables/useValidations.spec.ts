@@ -14,11 +14,12 @@ describe("useValidations", () => {
         expect(emailFormat("teste_invalido")).toBe("E-mail inválido");
     });
 
-    it("passwordRules should require 8 chars, uppercase, and special char", () => {
+    it("passwordRules should require 8 chars, uppercase, number and special char", () => {
         expect(passwordRules("")).toBe("Senha é obrigatória");
         expect(passwordRules("123")).toBe("A senha deve ter no mínimo 8 caracteres");
         expect(passwordRules("12345678")).toBe("Deve conter pelo menos uma letra maiúscula");
         expect(passwordRules("12345678A")).toBe("Deve conter pelo menos um caractere especial");
+        expect(passwordRules("ABCD@(lks")).toBe("Deve conter pelo menos um número");
         expect(passwordRules("12345678A@")).toBe(true);
     });
 
