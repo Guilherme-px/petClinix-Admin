@@ -15,4 +15,5 @@ export interface AuthResult {
     refreshToken: string;
     email: string;
     role: string;
+    name: string;
 }

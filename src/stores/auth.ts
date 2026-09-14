@@ -41,6 +41,7 @@ export const useAuthStore = defineStore("auth", () => {
         user.value = {
             email: result.email,
             role: result.role,
+            name: result.name
         } as User;
         persistTokens();
     }
