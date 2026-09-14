@@ -7,8 +7,7 @@ type MockAxios = Mock & {
         request: { use: Mock };
         response: { use: Mock };
     };
-    post: Mock;
-    get: Mock;
+    request: Mock;
 };
 
 vi.mock("axios", () => {
@@ -17,8 +16,7 @@ vi.mock("axios", () => {
         request: { use: vi.fn<() => void>() },
         response: { use: vi.fn<() => void>() },
     };
-    instance.post = vi.fn<() => Promise<unknown>>();
-    instance.get = vi.fn<() => Promise<unknown>>();
+    instance.request = vi.fn<() => Promise<unknown>>();
     return {
         default: {
             create: vi.fn<() => MockAxios>(() => instance),
@@ -43,10 +41,8 @@ describe("HttpClient", () => {
     });
 
     const getRequestInterceptor = () => mockInstance.interceptors.request.use.mock.calls[0][0];
-    const getResponseSuccessInterceptor = () =>
-        mockInstance.interceptors.response.use.mock.calls[0][0];
-    const getResponseErrorInterceptor = () =>
-        mockInstance.interceptors.response.use.mock.calls[0][1];
+    const getResponseSuccessInterceptor = () => mockInstance.interceptors.response.use.mock.calls[0][0];
+    const getResponseErrorInterceptor = () => mockInstance.interceptors.response.use.mock.calls[0][1];
 
     it("should be created with baseURL", () => {
         expect(axios.create).toHaveBeenCalledWith({ baseURL: "http://test.com" });
@@ -72,22 +68,54 @@ describe("HttpClient", () => {
     });
 
     it("should make post request and return data", async () => {
-        mockInstance.post.mockResolvedValue({ data: { success: true } });
+        mockInstance.request.mockResolvedValue({ data: { success: true } });
         const result = await client.post("/api", { foo: "bar" });
-        expect(mockInstance.post).toHaveBeenCalledWith("/api", { foo: "bar" });
+        expect(mockInstance.request).toHaveBeenCalledWith({
+            method: "post",
+            url: "/api",
+            data: { foo: "bar" },
+        });
         expect(result).toEqual({ success: true });
     });
 
     it("should throw error on post failure", async () => {
         const error = new Error("Network Error");
-        mockInstance.post.mockRejectedValue(error);
+        mockInstance.request.mockRejectedValue(error);
         await expect(client.post("/api", {})).rejects.toThrow("Network Error");
+    });
+
+    it("should make get request and return data", async () => {
+        mockInstance.request.mockResolvedValue({ data: { success: true } });
+        const result = await client.get("/api/users/me");
+        expect(mockInstance.request).toHaveBeenCalledWith({
+            method: "get",
+            url: "/api/users/me",
+            data: undefined,
+        });
+        expect(result).toEqual({ success: true });
     });
 
     it("should throw error on get failure", async () => {
         const error = new Error("Network Error");
-        mockInstance.get.mockRejectedValue(error);
+        mockInstance.request.mockRejectedValue(error);
         await expect(client.get("/api")).rejects.toThrow("Network Error");
+    });
+
+    it("should make put request and return data", async () => {
+        mockInstance.request.mockResolvedValue({ data: { success: true } });
+        const result = await client.put("/api/account/me", { foo: "bar" });
+        expect(mockInstance.request).toHaveBeenCalledWith({
+            method: "put",
+            url: "/api/account/me",
+            data: { foo: "bar" },
+        });
+        expect(result).toEqual({ success: true });
+    });
+
+    it("should throw error on put failure", async () => {
+        const error = new Error("Network Error");
+        mockInstance.request.mockRejectedValue(error);
+        await expect(client.put("/api", {})).rejects.toThrow("Network Error");
     });
 
     it("should handle 401 by refreshing token and retrying request", async () => {
@@ -176,12 +204,5 @@ describe("HttpClient", () => {
         const interceptor = getResponseErrorInterceptor();
 
         await expect(interceptor(error401)).rejects.toThrow("Refresh failed");
-    });
-
-    it("should make get request and return data", async () => {
-        mockInstance.get.mockResolvedValue({ data: { success: true } });
-        const result = await client.get("/api/users/me");
-        expect(mockInstance.get).toHaveBeenCalledWith("/api/users/me");
-        expect(result).toEqual({ success: true });
     });
 });
