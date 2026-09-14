@@ -1,4 +1,4 @@
-import type { LoginPayload, AuthResult, User } from "@/domain/models/Auth";
+import type { LoginPayload, AuthResult, User, UpdateAccountPayload } from "@/domain/models/Auth";
 
 export interface IAuthRepository {
     login(payload: LoginPayload): Promise<AuthResult>;
@@ -6,4 +6,5 @@ export interface IAuthRepository {
     getProfile(): Promise<User>;
     requestPasswordReset(email: string): Promise<string>;
     setPassword(token: string, password: string): Promise<void>;
+     updateAccount(payload: UpdateAccountPayload): Promise<void>;
 }

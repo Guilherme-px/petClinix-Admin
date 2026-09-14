@@ -1,5 +1,5 @@
 import type { IAuthRepository } from "@/domain/repositories/IAuthRepository";
-import type { LoginPayload, AuthResult, User } from "@/domain/models/Auth";
+import type { LoginPayload, AuthResult, User, UpdateAccountPayload } from "@/domain/models/Auth";
 import { HttpClient } from "@/infrastructure/http/HttpClient";
 
 export class AuthRepository implements IAuthRepository {
@@ -30,5 +30,9 @@ export class AuthRepository implements IAuthRepository {
 
     async setPassword(token: string, password: string): Promise<void> {
         await this.httpClient.post<void>("/api/users/set-password", { token, password });
+    }
+
+    async updateAccount(payload: UpdateAccountPayload): Promise<void> {
+        await this.httpClient.put<void>("/api/account/me", payload);
     }
 }
