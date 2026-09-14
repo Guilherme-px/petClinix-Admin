@@ -1,5 +1,5 @@
 import type { IAuthRepository } from "@/domain/repositories/IAuthRepository";
-import type { LoginPayload, AuthResult, User } from "@/domain/models/Auth";
+import type { LoginPayload, AuthResult, User, UpdateAccountPayload } from "@/domain/models/Auth";
 
 export const createAuthService = (authRepository: IAuthRepository) => {
     return {
@@ -21,6 +21,10 @@ export const createAuthService = (authRepository: IAuthRepository) => {
 
         async setPassword(token: string, password: string): Promise<void> {
             return await authRepository.setPassword(token, password);
+        },
+
+        async updateAccount(payload: UpdateAccountPayload): Promise<void> {
+            return await authRepository.updateAccount(payload);
         },
     };
 };
