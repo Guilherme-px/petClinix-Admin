@@ -1,18 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { AuthRepository } from "../../../infrastructure/repositories/AuthRepository";
 import { HttpClient } from "../../../infrastructure/http/HttpClient";
-import type { AuthResult, User } from "../../../domain/models/Auth";
+import { createHttpClientMock } from "../../../test/helpers/mockHttpClient";
+import type { AuthResult, UpdateAccountPayload, User } from "../../../domain/models/Auth";
 
 describe("AuthRepository", () => {
     let httpClientMock: HttpClient;
     let authRepository: AuthRepository;
 
     beforeEach(() => {
-        httpClientMock = {
-            post: vi.fn<(url: string, data: unknown) => Promise<AuthResult>>(),
-            get: vi.fn<(url: string) => Promise<User>>(),
-        } as unknown as HttpClient;
-
+        httpClientMock = createHttpClientMock();
         authRepository = new AuthRepository(httpClientMock);
     });
 
@@ -21,6 +18,7 @@ describe("AuthRepository", () => {
             token: "fake-token",
             refreshToken: "fake-refresh",
             email: "admin@test.com",
+            name: "Admin User",
             role: "Admin",
         };
 
@@ -38,6 +36,7 @@ describe("AuthRepository", () => {
             token: "new-fake-token",
             refreshToken: "new-fake-refresh",
             email: "admin@test.com",
+            name: "Admin User",
             role: "Admin",
         };
 
@@ -90,5 +89,32 @@ describe("AuthRepository", () => {
             token,
             password,
         });
+    });
+
+    it("should call updateAccount endpoint with correct payload", async () => {
+        const payload: UpdateAccountPayload = {
+            userName: "Updated Name",
+            userPhoneNumber: "11999998888",
+            userBirthDate: "1990-01-01",
+            newPassword: "NewPassword@123",
+            clinicTradeName: "Updated Clinic",
+            clinicLegalName: "Updated LLC",
+            clinicDocumentNumber: "12345678000199",
+            clinicEmail: "clinic@test.com",
+            clinicPhoneNumber: "11988887777",
+            clinicZipCode: "01001000",
+            clinicStreet: "Updated Street",
+            clinicNumber: "123",
+            clinicNeighborhood: "Center",
+            clinicComplement: "Apt 1",
+            clinicCity: "Sao Paulo",
+            clinicState: "SP",
+        };
+
+        vi.mocked(httpClientMock.put).mockResolvedValue(undefined);
+
+        await authRepository.updateAccount(payload);
+
+        expect(httpClientMock.put).toHaveBeenCalledWith("/api/account/me", payload);
     });
 });
