@@ -61,21 +61,28 @@ export class HttpClient {
         this.logoutFn = logoutFn;
     }
 
-    async get<T>(url: string): Promise<T> {
+    private async request<T, TRequest = unknown>(
+        method: "get" | "post" | "put",
+        url: string,
+        data?: TRequest,
+    ): Promise<T> {
         try {
-            const response = await this.instance.get<T>(url);
+            const response = await this.instance.request<T>({ method, url, data });
             return response.data;
         } catch (error: unknown) {
             throw errorHandler(error);
         }
     }
 
+    async get<T>(url: string): Promise<T> {
+        return this.request<T>("get", url);
+    }
+
     async post<T, TRequest = unknown>(url: string, data: TRequest): Promise<T> {
-        try {
-            const response = await this.instance.post<T>(url, data);
-            return response.data;
-        } catch (error: unknown) {
-            throw errorHandler(error);
-        }
+        return this.request<T, TRequest>("post", url, data);
+    }
+
+    async put<T, TRequest = unknown>(url: string, data: TRequest): Promise<T> {
+        return this.request<T, TRequest>("put", url, data);
     }
 }
