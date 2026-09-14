@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import { container } from "@/infrastructure/container";
-import type { LoginPayload, AuthResult, User } from "@/domain/models/Auth";
+import type { LoginPayload, AuthResult, User, UpdateAccountPayload } from "@/domain/models/Auth";
 
 export const useAuthStore = defineStore("auth", () => {
     const token = ref<string | null>(localStorage.getItem("token"));
@@ -18,6 +18,7 @@ export const useAuthStore = defineStore("auth", () => {
         );
         const result = await authService.login(payload);
         setAuthData(result);
+        await fetchUser();
     }
 
     async function doRefreshToken(): Promise<string | null> {
@@ -41,7 +42,7 @@ export const useAuthStore = defineStore("auth", () => {
         user.value = {
             email: result.email,
             role: result.role,
-            name: result.name
+            name: result.name,
         } as User;
         persistTokens();
     }
@@ -97,6 +98,13 @@ export const useAuthStore = defineStore("auth", () => {
         await authService.setPassword(token, password);
     }
 
+    async function updateAccount(payload: UpdateAccountPayload): Promise<void> {
+        const authService = container.resolve<{
+            updateAccount: (p: UpdateAccountPayload) => Promise<void>;
+        }>("AuthService");
+        await authService.updateAccount(payload);
+    }
+
     return {
         token,
         refreshToken,
@@ -110,5 +118,6 @@ export const useAuthStore = defineStore("auth", () => {
         fetchUser,
         requestPasswordReset,
         setPassword,
+        updateAccount,
     };
 });
