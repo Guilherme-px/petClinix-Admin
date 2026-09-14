@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { createAuthService } from "../../application/services/authService";
 import type { IAuthRepository } from "../../domain/repositories/IAuthRepository";
-import type { LoginPayload, AuthResult, User } from "../../domain/models/Auth";
+import type { LoginPayload, AuthResult, User, UpdateAccountPayload } from "../../domain/models/Auth";
 
 describe("authService", () => {
     const mockAuthResult: AuthResult = {
@@ -9,6 +9,7 @@ describe("authService", () => {
         refreshToken: "new-fake-refresh",
         email: "admin@petclinix.com",
         role: "Admin",
+        name: "fake-name"
     };
 
     const mockUser: User = {
@@ -19,6 +20,25 @@ describe("authService", () => {
     };
 
     const mockResetToken = "fake-reset-token";
+
+    const mockUpdatePayload: UpdateAccountPayload = {
+        userName: "Updated Name",
+        userPhoneNumber: "11999998888",
+        userBirthDate: "1990-01-01",
+        newPassword: "NewPassword@123",
+        clinicTradeName: "Updated Clinic",
+        clinicLegalName: "Updated LLC",
+        clinicDocumentNumber: "12345678000199",
+        clinicEmail: "clinic@petclinix.com",
+        clinicPhoneNumber: "11988887777",
+        clinicZipCode: "01001000",
+        clinicStreet: "Updated Street",
+        clinicNumber: "123",
+        clinicNeighborhood: "Center",
+        clinicComplement: "Apt 1",
+        clinicCity: "Sao Paulo",
+        clinicState: "SP",
+    };
 
     const mockRepo: IAuthRepository = {
         login: vi
@@ -33,6 +53,9 @@ describe("authService", () => {
             .mockResolvedValue(mockResetToken),
         setPassword: vi
             .fn<(token: string, password: string) => Promise<void>>()
+            .mockResolvedValue(undefined),
+        updateAccount: vi
+            .fn<(payload: UpdateAccountPayload) => Promise<void>>()
             .mockResolvedValue(undefined),
     };
 
@@ -76,5 +99,12 @@ describe("authService", () => {
         await service.setPassword("fake-reset-token", "NewPassword@123");
 
         expect(mockRepo.setPassword).toHaveBeenCalledWith("fake-reset-token", "NewPassword@123");
+    });
+
+    it("should call repository updateAccount with payload", async () => {
+        const service = createAuthService(mockRepo);
+        await service.updateAccount(mockUpdatePayload);
+
+        expect(mockRepo.updateAccount).toHaveBeenCalledWith(mockUpdatePayload);
     });
 });
