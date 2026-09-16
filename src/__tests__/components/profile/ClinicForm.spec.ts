@@ -33,12 +33,14 @@ describe("ClinicForm", () => {
 
         expect(findInputByLabel(wrapper, "Nome Fantasia")!.element.value).toBe("Pet Clinix");
         expect(findInputByLabel(wrapper, "Razão Social")!.element.value).toBe("Pet Clinix LTDA");
-        expect(findInputByLabel(wrapper, "CNPJ")!.element.value).toBe("12345678000199");
+        expect(findInputByLabel(wrapper, "CNPJ")!.element.value).toBe("12.345.678/0001-99");
         expect(findInputByLabel(wrapper, "E-mail da Clínica")!.element.value).toBe(
             "clinic@petclinix.com",
         );
-        expect(findInputByLabel(wrapper, "Telefone da Clínica")!.element.value).toBe("11988887777");
-        expect(findInputByLabel(wrapper, "CEP")!.element.value).toBe("01001000");
+        expect(findInputByLabel(wrapper, "Telefone da Clínica")!.element.value).toBe(
+            "(11) 98888-7777",
+        );
+        expect(findInputByLabel(wrapper, "CEP")!.element.value).toBe("01001-000");
         expect(findInputByLabel(wrapper, "Rua")!.element.value).toBe("Main Street");
         expect(findInputByLabel(wrapper, "Número")!.element.value).toBe("123");
         expect(findInputByLabel(wrapper, "Bairro")!.element.value).toBe("Center");
@@ -61,7 +63,9 @@ describe("ClinicForm", () => {
         await wrapper.setProps({ clinic: createMockClinic() });
 
         expect(findInputByLabel(wrapper, "Nome Fantasia")!.element.value).toBe("Pet Clinix");
-        expect(findInputByLabel(wrapper, "Telefone da Clínica")!.element.value).toBe("11988887777");
+        expect(findInputByLabel(wrapper, "Telefone da Clínica")!.element.value).toBe(
+            "(11) 98888-7777",
+        );
     });
 
     it("should pass isLoading to submit button", () => {

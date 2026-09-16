@@ -32,7 +32,7 @@ describe("UserForm", () => {
         const wrapper = mountForm();
 
         expect(findInputByLabel(wrapper, "Nome Completo")!.element.value).toBe("John Doe");
-        expect(findInputByLabel(wrapper, "Telefone")!.element.value).toBe("11999998888");
+        expect(findInputByLabel(wrapper, "Telefone")!.element.value).toBe("(11) 99999-8888");
         expect(findInputByLabel(wrapper, "Data de Nascimento")!.element.value).toBe("1990-01-01");
         expect(findInputByLabel(wrapper, "E-mail")!.element.value).toBe("john@petclinix.com");
         expect(findInputByLabel(wrapper, "CPF")!.element.value).toBe("123.456.789-00");
@@ -51,7 +51,7 @@ describe("UserForm", () => {
         await wrapper.setProps({ user: createMockUser() });
 
         expect(findInputByLabel(wrapper, "Nome Completo")!.element.value).toBe("John Doe");
-        expect(findInputByLabel(wrapper, "Telefone")!.element.value).toBe("11999998888");
+        expect(findInputByLabel(wrapper, "Telefone")!.element.value).toBe("(11) 99999-8888");
     });
 
     it("should disable email and CPF inputs", () => {
