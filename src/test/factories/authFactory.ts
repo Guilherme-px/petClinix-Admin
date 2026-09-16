@@ -1,4 +1,4 @@
-import type { User, UpdateAccountPayload, AuthResult } from "@/domain/models/Auth";
+import type { User, UpdateAccountPayload, AuthResult, Clinic } from "@/domain/models/Auth";
 
 export function createUpdateAccountPayload(
     overrides: Partial<UpdateAccountPayload> = {},
@@ -46,4 +46,22 @@ export function createAuthResult(overrides: Partial<AuthResult> = {}): AuthResul
         role: "Admin",
         ...overrides,
     };
+}
+
+export function createMockClinic(overrides: Partial<Clinic> = {}): Clinic {
+    return {
+        tradeName: "Pet Clinix",
+        legalName: "Pet Clinix LTDA",
+        documentNumber: "12345678000199",
+        email: "clinic@petclinix.com",
+        phoneNumber: "11988887777",
+        zipCode: "01001000",
+        street: "Main Street",
+        number: "123",
+        neighborhood: "Center",
+        complement: "Apt 1",
+        city: "Sao Paulo",
+        state: "SP",
+        ...overrides,
+    } as Clinic;
 }
