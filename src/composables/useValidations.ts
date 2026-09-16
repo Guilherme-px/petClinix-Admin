@@ -31,11 +31,28 @@ export const useValidations = () => {
         return (val: string) => val === compareValue || "As senhas não coincidem.";
     };
 
+    const digits = (val: string | null | undefined) => (val || "").replace(/\D/g, "");
+
+    const phoneFormat = (val: string) => {
+        const len = digits(val).length;
+        return len === 10 || len === 11 || "Telefone inválido";
+    };
+
+    const cpfFormat = (val: string) => digits(val).length === 11 || "CPF inválido";
+
+    const cnpjFormat = (val: string) => digits(val).length === 14 || "CNPJ inválido";
+
+    const cepFormat = (val: string) => digits(val).length === 8 || "CEP inválido";
+
     return {
         required,
         emailFormat,
         passwordRules,
         optionalPasswordRules,
         confirmPasswordRules,
+        phoneFormat,
+        cpfFormat,
+        cnpjFormat,
+        cepFormat,
     };
 };

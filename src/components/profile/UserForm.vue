@@ -1,13 +1,49 @@
 <template>
     <q-form @submit="onSubmit" class="q-gutter-md">
-        <q-input outlined v-model="form.userName" label="Nome Completo" lazy-rules :rules="[required]" />
-        <q-input outlined v-model="form.userPhoneNumber" label="Telefone" lazy-rules :rules="[required]" />
-        <q-input outlined v-model="form.userBirthDate" label="Data de Nascimento" type="date" stack-label />
-        <q-input outlined :model-value="user?.email" label="E-mail" disable hint="O e-mail não pode ser alterado" />
-        <q-input outlined :model-value="user?.documentNumber" label="CPF" disable hint="O CPF não pode ser alterado" />
+        <q-input
+            outlined
+            v-model="form.userName"
+            label="Nome Completo"
+            lazy-rules
+            :rules="[required]"
+        />
+        <q-input
+            outlined
+            v-model="form.userPhoneNumber"
+            label="Telefone"
+            :mask="phoneMask"
+            unmasked-value
+            lazy-rules
+            :rules="[required, phoneFormat]"
+        />
+        <q-input
+            outlined
+            v-model="form.userBirthDate"
+            label="Data de Nascimento"
+            type="date"
+            stack-label
+        />
+        <q-input
+            outlined
+            :model-value="user?.email"
+            label="E-mail"
+            disable
+            hint="O e-mail não pode ser alterado"
+        />
+        <q-input
+            outlined
+            :model-value="user?.documentNumber"
+            label="CPF"
+            :mask="cpfMask"
+            unmasked-value
+            disable
+            hint="O CPF não pode ser alterado"
+        />
 
         <q-separator class="q-my-md" />
-        <div class="text-subtitle2 text-grey-7">Alterar Senha (deixe em branco para manter a atual)</div>
+        <div class="text-subtitle2 text-grey-7">
+            Alterar Senha (deixe em branco para manter a atual)
+        </div>
 
         <q-input
             outlined
@@ -35,7 +71,13 @@
         />
 
         <div class="row justify-end">
-            <q-btn unelevated label="Salvar Alterações" type="submit" color="primary" :loading="isLoading" />
+            <q-btn
+                unelevated
+                label="Salvar Alterações"
+                type="submit"
+                color="primary"
+                :loading="isLoading"
+            />
         </div>
     </q-form>
 </template>
@@ -44,11 +86,14 @@
 import { ref, watch } from "vue";
 import type { User, UpdateAccountPayload } from "@/domain/models/Auth";
 import { useValidations } from "@/composables/useValidations";
+import { useMasks } from "@/composables/useMasks";
 
 const props = defineProps<{ user: User | null; isLoading: boolean }>();
 const emit = defineEmits<{ (e: "submit", payload: Partial<UpdateAccountPayload>): void }>();
 
-const { required, optionalPasswordRules, confirmPasswordRules } = useValidations();
+const { phoneMask, cpfMask } = useMasks();
+const { required, optionalPasswordRules, confirmPasswordRules, phoneFormat } =
+    useValidations();
 
 const isPwd = ref(true);
 const confirmNewPassword = ref("");
@@ -57,16 +102,20 @@ const form = ref<Partial<UpdateAccountPayload>>({
     userName: "",
     userPhoneNumber: "",
     userBirthDate: "",
-    newPassword: ""
+    newPassword: "",
 });
 
-watch(() => props.user, (newUser) => {
-    if (newUser) {
-        form.value.userName = newUser.name || "";
-        form.value.userPhoneNumber = newUser.phoneNumber || "";
-        form.value.userBirthDate = newUser.birthDate || "";
-    }
-}, { immediate: true });
+watch(
+    () => props.user,
+    (newUser) => {
+        if (newUser) {
+            form.value.userName = newUser.name || "";
+            form.value.userPhoneNumber = newUser.phoneNumber || "";
+            form.value.userBirthDate = newUser.birthDate || "";
+        }
+    },
+    { immediate: true },
+);
 
 const onSubmit = () => {
     if (!form.value.newPassword) {

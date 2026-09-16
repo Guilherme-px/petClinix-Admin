@@ -19,8 +19,10 @@
                 outlined
                 v-model="form.clinicDocumentNumber"
                 label="CNPJ"
+                :mask="cnpjMask"
+                unmasked-value
                 lazy-rules
-                :rules="[required]"
+                :rules="[required, cnpjFormat]"
             />
             <q-input
                 outlined
@@ -33,8 +35,10 @@
                 outlined
                 v-model="form.clinicPhoneNumber"
                 label="Telefone da Clínica"
+                :mask="phoneMask"
+                unmasked-value
                 lazy-rules
-                :rules="[required]"
+                :rules="[required, phoneFormat]"
             />
 
             <div class="text-subtitle1 text-weight-medium text-grey-8 q-pt-md q-pb-sm">
@@ -46,8 +50,10 @@
                     class="col-xs-12 col-sm-6 col-md-4"
                     v-model="form.clinicZipCode"
                     label="CEP"
+                    :mask="cepMask"
+                    unmasked-value
                     lazy-rules
-                    :rules="[required]"
+                    :rules="[required, cepFormat]"
                 />
                 <q-input
                     outlined
@@ -114,11 +120,13 @@
 import { ref, watch } from "vue";
 import type { Clinic, UpdateAccountPayload } from "@/domain/models/Auth";
 import { useValidations } from "@/composables/useValidations";
+import { useMasks } from "@/composables/useMasks";
 
 const props = defineProps<{ clinic: Clinic | null | undefined; isLoading: boolean }>();
 const emit = defineEmits<{ (e: "submit", payload: Partial<UpdateAccountPayload>): void }>();
 
-const { required, emailFormat } = useValidations();
+const { phoneMask, cnpjMask, cepMask } = useMasks();
+const { required, emailFormat, phoneFormat, cnpjFormat, cepFormat } = useValidations();
 
 const form = ref<Partial<UpdateAccountPayload>>({
     clinicTradeName: "",
