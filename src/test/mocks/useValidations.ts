@@ -11,7 +11,17 @@ export const validationsMock = {
     },
     confirmPasswordRules: (compareValue: string) => (val: string) =>
         val === compareValue || "As senhas não coincidem.",
+
+    phoneFormat: (val: string) => {
+        const len = digits(val).length;
+        return len === 10 || len === 11 || "Telefone inválido";
+    },
+    cpfFormat: (val: string) => digits(val).length === 11 || "CPF inválido",
+    cnpjFormat: (val: string) => digits(val).length === 14 || "CNPJ inválido",
+    cepFormat: (val: string) => digits(val).length === 8 || "CEP inválido",
 };
+
+const digits = (val: string | null | undefined) => (val || "").replace(/\D/g, "");
 
 const passwordStrengthMock = (val: string): true | string => {
     if (val.length < 8) return "A senha deve ter no mínimo 8 caracteres";
