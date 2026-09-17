@@ -1,6 +1,8 @@
 import { HttpClient } from "./http/HttpClient";
 import { AuthRepository } from "./repositories/AuthRepository";
+import { ServiceRepository } from "./repositories/ServiceRepository";
 import { createAuthService } from "@/application/services/authService";
+import { createCatalogService } from "@/application/services/catalogService.ts";
 
 /* v8 ignore next 1: Fallback para ambiente de dev */
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5180";
@@ -13,10 +15,14 @@ class Container {
     private constructor() {
         this.httpClient = new HttpClient(API_URL);
         const authRepository = new AuthRepository(this.httpClient);
+        const serviceRepository = new ServiceRepository(this.httpClient);
         const authService = createAuthService(authRepository);
+        const catalogService = createCatalogService(serviceRepository);
 
         this.services.set("IAuthRepository", authRepository);
         this.services.set("AuthService", authService);
+        this.services.set("IServiceRepository", serviceRepository);
+        this.services.set("CatalogService", catalogService);
     }
 
     /* v8 ignore next 4: Singleton pattern, instance creation is covered by module load */
