@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
-import { createAuthService } from "../../application/services/authService";
-import type { IAuthRepository } from "../../domain/repositories/IAuthRepository";
-import type { LoginPayload, AuthResult, User, UpdateAccountPayload } from "../../domain/models/Auth";
+import { createAuthService } from "../../../application/services/authService";
+import type { IAuthRepository } from "../../../domain/repositories/IAuthRepository";
+import type { LoginPayload, AuthResult, User, UpdateAccountPayload } from "../../../domain/models/Auth";
 
 describe("authService", () => {
     const mockAuthResult: AuthResult = {
