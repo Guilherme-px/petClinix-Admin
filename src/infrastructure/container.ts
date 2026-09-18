@@ -2,7 +2,7 @@ import { HttpClient } from "./http/HttpClient";
 import { AuthRepository } from "./repositories/AuthRepository";
 import { ServiceRepository } from "./repositories/ServiceRepository";
 import { createAuthService } from "@/application/services/authService";
-import { createCatalogService } from "@/application/services/catalogService.ts";
+import { createCatalogService } from "@/application/services/catalogService";
 
 /* v8 ignore next 1: Fallback para ambiente de dev */
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5180";
