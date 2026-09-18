@@ -1,16 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { AuthRepository } from "../../../infrastructure/repositories/AuthRepository";
 import { HttpClient } from "../../../infrastructure/http/HttpClient";
-import { createHttpClientMock } from "../../../test/helpers/mockHttpClient";
+import { createHttpClientMock, HttpClientMock } from "../../../test/helpers/mockHttpClient";
 import type { AuthResult, UpdateAccountPayload, User } from "../../../domain/models/Auth";
 
 describe("AuthRepository", () => {
-    let httpClientMock: HttpClient;
+    let httpClientMock: HttpClientMock;
     let authRepository: AuthRepository;
 
     beforeEach(() => {
         httpClientMock = createHttpClientMock();
-        authRepository = new AuthRepository(httpClientMock);
+        authRepository = new AuthRepository(httpClientMock as unknown as HttpClient);
     });
 
     it("should call login endpoint with correct payload", async () => {
