@@ -12,6 +12,7 @@ describe("useValidations", () => {
         cpfFormat,
         cnpjFormat,
         cepFormat,
+        positiveNumber,
     } = useValidations();
 
     it("required should return message if empty and true if filled", () => {
@@ -82,5 +83,14 @@ describe("useValidations", () => {
         expect(cepFormat("0100100")).toBe("CEP inválido");
         expect(cepFormat("01001000")).toBe(true);
         expect(cepFormat("01001-000")).toBe(true);
+    });
+
+    it("positiveNumber should require filled value greater than zero", () => {
+        expect(positiveNumber("")).toBe("Campo obrigatório");
+        expect(positiveNumber(null)).toBe("Campo obrigatório");
+        expect(positiveNumber(undefined)).toBe("Campo obrigatório");
+        expect(positiveNumber(0)).toBe("Deve ser maior que zero");
+        expect(positiveNumber(0.01)).toBe(true);
+        expect(positiveNumber(150)).toBe(true);
     });
 });

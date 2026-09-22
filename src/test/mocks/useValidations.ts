@@ -19,6 +19,13 @@ export const validationsMock = {
     cpfFormat: (val: string) => digits(val).length === 11 || "CPF inválido",
     cnpjFormat: (val: string) => digits(val).length === 14 || "CNPJ inválido",
     cepFormat: (val: string) => digits(val).length === 8 || "CEP inválido",
+
+    positiveNumber: (val: number | string | null | undefined) => {
+        if (val === "" || val === null || val === undefined || Number.isNaN(Number(val))) {
+            return "Campo obrigatório";
+        }
+        return Number(val) > 0 || "Deve ser maior que zero";
+    },
 };
 
 const digits = (val: string | null | undefined) => (val || "").replace(/\D/g, "");
