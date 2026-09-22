@@ -22,7 +22,7 @@
                     class="search-input"
                     placeholder="Buscar..."
                     :model-value="table.search.value"
-                    @update:model-value="(value) => table.setSearch(String(value ?? ''))"
+                    @update:model-value="(value) => table.setSearch(String(value))"
                 >
                     <template #append>
                         <q-icon name="search" />
@@ -31,11 +31,11 @@
             </template>
 
             <template v-for="(_, name) in passThroughSlots" :key="name" #[name]="slotProps">
-                <slot :name="name" v-bind="slotProps ?? {}" />
+                <slot :name="name" v-bind="slotProps" />
             </template>
 
             <template #item="itemProps">
-                <slot name="item" v-bind="itemProps ?? {}">
+                <slot name="item" v-bind="itemProps">
                     <div class="q-pa-xs col-12">
                         <q-card flat bordered class="q-pa-md">
                             <div v-for="col in itemProps.cols" :key="col.name" class="row q-py-xs">
