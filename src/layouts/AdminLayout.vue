@@ -46,7 +46,7 @@
             </q-toolbar>
         </q-header>
 
-        <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
+        <q-drawer v-model="leftDrawerOpen" show-if-above bordered class="bg-grey-2">
             <div class="column fit">
                 <q-scroll-area class="col">
                     <q-list>
