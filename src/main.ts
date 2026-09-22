@@ -1,6 +1,7 @@
 import { createApp } from "vue";
 import { createPinia } from "pinia";
 import { Quasar, Notify } from "quasar";
+import langPtBr from "quasar/lang/pt-BR";
 import { useAuthStore } from "./stores/auth.ts";
 import { container } from "./infrastructure/container.ts";
 
@@ -19,6 +20,7 @@ app.use(Quasar, {
     plugins: {
         Notify,
     },
+    lang: langPtBr,
 });
 
 const authStore = useAuthStore();
