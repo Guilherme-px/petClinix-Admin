@@ -44,6 +44,13 @@ export const useValidations = () => {
 
     const cepFormat = (val: string) => digits(val).length === 8 || "CEP inválido";
 
+    const positiveNumber = (val: number | string | null | undefined) => {
+        if (val === "" || val === null || val === undefined || Number.isNaN(Number(val))) {
+            return "Campo obrigatório";
+        }
+        return Number(val) > 0 || "Deve ser maior que zero";
+    };
+
     return {
         required,
         emailFormat,
@@ -54,5 +61,6 @@ export const useValidations = () => {
         cpfFormat,
         cnpjFormat,
         cepFormat,
+        positiveNumber,
     };
 };
