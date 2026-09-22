@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import { createCatalogService } from "../../../application/services/catalogService";
 import type { IServiceRepository } from "../../../domain/repositories/IServiceRepository";
 import type { VeterinaryService } from "../../../domain/models/VeterinaryService";
-import type { FetchParams, PaginatedResponse } from "../../../domain/models/common";
+import type { FetchParams, PaginatedResponse } from "../../../domain/models/pagination";
 
 describe("catalogService", () => {
     const mockService: VeterinaryService = {

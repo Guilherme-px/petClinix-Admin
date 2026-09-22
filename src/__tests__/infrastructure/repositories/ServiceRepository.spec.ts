@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { ServiceRepository } from "../../../infrastructure/repositories/ServiceRepository";
 import { HttpClient } from "../../../infrastructure/http/HttpClient";
-import type { PaginatedResponse } from "../../../domain/models/common";
+import type { PaginatedResponse } from "../../../domain/models/pagination";
 import type { VeterinaryService } from "../../../domain/models/VeterinaryService";
 import { createHttpClientMock, HttpClientMock } from "../../../test/helpers/mockHttpClient";
 
