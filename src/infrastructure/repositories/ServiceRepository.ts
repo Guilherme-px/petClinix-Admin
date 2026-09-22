@@ -1,6 +1,6 @@
 import type { IServiceRepository } from "@/domain/repositories/IServiceRepository";
 import type { VeterinaryService } from "@/domain/models/VeterinaryService";
-import type { FetchParams, PaginatedResponse } from "@/domain/models/common";
+import type { FetchParams, PaginatedResponse } from "@/domain/models/pagination";
 import { HttpClient } from "@/infrastructure/http/HttpClient";
 
 export class ServiceRepository implements IServiceRepository {
