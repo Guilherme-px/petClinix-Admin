@@ -1,5 +1,5 @@
 import type { IServiceRepository } from "@/domain/repositories/IServiceRepository";
-import type { VeterinaryService } from "@/domain/models/VeterinaryService";
+import type { ServicePayload, VeterinaryService } from "@/domain/models/VeterinaryService";
 import type { FetchParams, PaginatedResponse } from "@/domain/models/pagination";
 import { HttpClient } from "@/infrastructure/http/HttpClient";
 
@@ -8,6 +8,10 @@ export class ServiceRepository implements IServiceRepository {
 
     constructor(httpClient: HttpClient) {
         this.httpClient = httpClient;
+    }
+
+    async register(payload: ServicePayload): Promise<void> {
+        await this.httpClient.post<void>("/api/services", payload);
     }
 
     async list(params: FetchParams): Promise<PaginatedResponse<VeterinaryService>> {
