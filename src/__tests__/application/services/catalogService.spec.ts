@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { createCatalogService } from "../../../application/services/catalogService";
 import type { IServiceRepository } from "../../../domain/repositories/IServiceRepository";
-import type { VeterinaryService } from "../../../domain/models/VeterinaryService";
+import type { ServicePayload, VeterinaryService } from "../../../domain/models/VeterinaryService";
 import type { FetchParams, PaginatedResponse } from "../../../domain/models/pagination";
 
 describe("catalogService", () => {
@@ -60,5 +60,27 @@ describe("catalogService", () => {
         await expect(createCatalogService(mockRepo).list(mockParams)).rejects.toThrow(
             "Network Error",
         );
+    });
+
+    it("should call repository register with payload", async () => {
+        const registerMock = vi
+            .fn<(payload: ServicePayload) => Promise<void>>()
+            .mockResolvedValue(undefined);
+        const mockRepo = {
+            list: vi.fn<(params: FetchParams) => Promise<PaginatedResponse<VeterinaryService>>>(),
+            register: registerMock,
+        } as unknown as IServiceRepository;
+
+        const payload: ServicePayload = {
+            name: "Consulta",
+            description: null,
+            durationInMinutes: 30,
+            price: 150,
+            requiresVeterinarian: true,
+        };
+
+        await createCatalogService(mockRepo).register(payload);
+
+        expect(registerMock).toHaveBeenCalledWith(payload);
     });
 });

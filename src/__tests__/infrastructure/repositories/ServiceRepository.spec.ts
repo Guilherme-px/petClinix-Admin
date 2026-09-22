@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { ServiceRepository } from "../../../infrastructure/repositories/ServiceRepository";
 import { HttpClient } from "../../../infrastructure/http/HttpClient";
 import type { PaginatedResponse } from "../../../domain/models/pagination";
-import type { VeterinaryService } from "../../../domain/models/VeterinaryService";
+import type { ServicePayload, VeterinaryService } from "../../../domain/models/VeterinaryService";
 import { createHttpClientMock, HttpClientMock } from "../../../test/helpers/mockHttpClient";
 
 describe("ServiceRepository", () => {
@@ -133,4 +133,36 @@ describe("ServiceRepository", () => {
         expect(result.items).toEqual([]);
         expect(result.totalCount).toBe(0);
     });
+
+        it("should call register endpoint with correct payload", async () => {
+            httpClientMock.post.mockResolvedValue(undefined);
+
+            const payload: ServicePayload = {
+                name: "Banho e Tosa",
+                description: "Higiene completa",
+                durationInMinutes: 60,
+                price: 90,
+                requiresVeterinarian: false,
+            };
+
+            await serviceRepository.register(payload);
+
+            expect(httpClientMock.post).toHaveBeenCalledWith("/api/services", payload);
+        });
+
+        it("should propagate errors from register endpoint", async () => {
+            httpClientMock.post.mockRejectedValue(new Error("Name already exists"));
+
+            const payload: ServicePayload = {
+                name: "Duplicado",
+                description: null,
+                durationInMinutes: 30,
+                price: 50,
+                requiresVeterinarian: true,
+            };
+
+            await expect(serviceRepository.register(payload)).rejects.toThrow(
+                "Name already exists",
+            );
+        });
 });
