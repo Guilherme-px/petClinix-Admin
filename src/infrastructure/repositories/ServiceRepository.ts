@@ -26,4 +26,8 @@ export class ServiceRepository implements IServiceRepository {
 
         return this.httpClient.get<PaginatedResponse<VeterinaryService>>(`/api/services?${query}`);
     }
+
+    async update(serviceId: string, payload: ServicePayload): Promise<void> {
+        await this.httpClient.put<void>(`/api/services/${serviceId}`, payload);
+    }
 }

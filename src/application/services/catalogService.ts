@@ -11,6 +11,10 @@ export const createCatalogService = (serviceRepository: IServiceRepository) => {
         async list(params: FetchParams): Promise<PaginatedResponse<VeterinaryService>> {
             return await serviceRepository.list(params);
         },
+
+        async update(serviceId: string, payload: ServicePayload): Promise<void> {
+            return await serviceRepository.update(serviceId, payload);
+        },
     };
 };
 
