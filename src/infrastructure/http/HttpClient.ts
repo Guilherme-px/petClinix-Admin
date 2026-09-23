@@ -62,7 +62,7 @@ export class HttpClient {
     }
 
     private async request<T, TRequest = unknown>(
-        method: "get" | "post" | "put",
+        method: "get" | "post" | "put" | "delete",
         url: string,
         data?: TRequest,
     ): Promise<T> {
@@ -84,5 +84,9 @@ export class HttpClient {
 
     async put<T, TRequest = unknown>(url: string, data: TRequest): Promise<T> {
         return this.request<T, TRequest>("put", url, data);
+    }
+
+    async delete<T>(url: string): Promise<T> {
+        return this.request<T>("delete", url);
     }
 }
