@@ -30,4 +30,8 @@ export class ServiceRepository implements IServiceRepository {
     async update(serviceId: string, payload: ServicePayload): Promise<void> {
         await this.httpClient.put<void>(`/api/services/${serviceId}`, payload);
     }
+
+    async remove(serviceId: string): Promise<void> {
+        await this.httpClient.delete<void>(`/api/services/${serviceId}`);
+    }
 }

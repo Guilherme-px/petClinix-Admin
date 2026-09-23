@@ -5,4 +5,5 @@ export interface IServiceRepository {
     register(payload: ServicePayload): Promise<void>;
     list(params: FetchParams): Promise<PaginatedResponse<VeterinaryService>>;
     update(serviceId: string, payload: ServicePayload): Promise<void>;
+    remove(serviceId: string): Promise<void>;
 }

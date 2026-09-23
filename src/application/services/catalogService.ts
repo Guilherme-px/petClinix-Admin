@@ -15,6 +15,10 @@ export const createCatalogService = (serviceRepository: IServiceRepository) => {
         async update(serviceId: string, payload: ServicePayload): Promise<void> {
             return await serviceRepository.update(serviceId, payload);
         },
+
+        async remove(serviceId: string): Promise<void> {
+            return await serviceRepository.remove(serviceId);
+        },
     };
 };
 
