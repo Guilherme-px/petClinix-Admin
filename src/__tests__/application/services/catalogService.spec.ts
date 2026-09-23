@@ -13,8 +13,15 @@ describe("catalogService", () => {
             list: vi.fn<(params: FetchParams) => Promise<PaginatedResponse<VeterinaryService>>>(),
             register: vi.fn<(payload: ServicePayload) => Promise<void>>(),
             update: vi.fn<(id: string, payload: ServicePayload) => Promise<void>>(),
+            remove: vi.fn<(id: string) => Promise<void>>(),
         };
-        return { repo, listMock: repo.list, registerMock: repo.register, updateMock: repo.update };
+        return {
+            repo,
+            listMock: repo.list,
+            registerMock: repo.register,
+            updateMock: repo.update,
+            removeMock: repo.remove,
+        };
     };
 
     it("should call repository list and return paginated result", async () => {
@@ -71,5 +78,13 @@ describe("catalogService", () => {
         await createCatalogService(repo).update("service-1", payload);
 
         expect(updateMock).toHaveBeenCalledWith("service-1", payload);
+    });
+
+    it("should call repository remove with service id", async () => {
+        const { repo, removeMock } = createRepoMock();
+
+        await createCatalogService(repo).remove("service-1");
+
+        expect(removeMock).toHaveBeenCalledWith("service-1");
     });
 });
