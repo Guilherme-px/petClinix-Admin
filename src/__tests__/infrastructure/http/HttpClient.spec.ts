@@ -41,8 +41,10 @@ describe("HttpClient", () => {
     });
 
     const getRequestInterceptor = () => mockInstance.interceptors.request.use.mock.calls[0][0];
-    const getResponseSuccessInterceptor = () => mockInstance.interceptors.response.use.mock.calls[0][0];
-    const getResponseErrorInterceptor = () => mockInstance.interceptors.response.use.mock.calls[0][1];
+    const getResponseSuccessInterceptor = () =>
+        mockInstance.interceptors.response.use.mock.calls[0][0];
+    const getResponseErrorInterceptor = () =>
+        mockInstance.interceptors.response.use.mock.calls[0][1];
 
     it("should be created with baseURL", () => {
         expect(axios.create).toHaveBeenCalledWith({ baseURL: "http://test.com" });
@@ -204,5 +206,25 @@ describe("HttpClient", () => {
         const interceptor = getResponseErrorInterceptor();
 
         await expect(interceptor(error401)).rejects.toThrow("Refresh failed");
+    });
+
+    it("should make delete request and return data", async () => {
+        mockInstance.request.mockResolvedValue({ data: { success: true } });
+
+        const result = await client.delete("/api/services/service-1");
+
+        expect(mockInstance.request).toHaveBeenCalledWith({
+            method: "delete",
+            url: "/api/services/service-1",
+            data: undefined,
+        });
+        expect(result).toEqual({ success: true });
+    });
+
+    it("should throw error on delete failure", async () => {
+        const error = new Error("Not Found");
+        mockInstance.request.mockRejectedValue(error);
+
+        await expect(client.delete("/api/services/service-1")).rejects.toThrow("Not Found");
     });
 });
