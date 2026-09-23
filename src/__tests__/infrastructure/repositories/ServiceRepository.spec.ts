@@ -1,32 +1,15 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { ServiceRepository } from "../../../infrastructure/repositories/ServiceRepository";
 import { HttpClient } from "../../../infrastructure/http/HttpClient";
-import type { PaginatedResponse } from "../../../domain/models/pagination";
-import type { ServicePayload, VeterinaryService } from "../../../domain/models/VeterinaryService";
 import { createHttpClientMock, HttpClientMock } from "../../../test/helpers/mockHttpClient";
+import {
+    createServicePayload,
+    createPaginatedServices,
+} from "../../../test/factories/catalogFactory";
 
 describe("ServiceRepository", () => {
     let httpClientMock: HttpClientMock;
     let serviceRepository: ServiceRepository;
-
-    const mockPaginatedResponse: PaginatedResponse<VeterinaryService> = {
-        items: [
-            {
-                id: "service-1",
-                name: "Banho e Tosa",
-                description: "Higiene completa",
-                durationInMinutes: 60,
-                price: 90,
-                requiresVeterinarian: false,
-            },
-        ],
-        totalCount: 1,
-        pageNumber: 1,
-        pageSize: 10,
-        totalPages: 1,
-        hasPreviousPage: false,
-        hasNextPage: false,
-    };
 
     beforeEach(() => {
         httpClientMock = createHttpClientMock();
@@ -34,6 +17,7 @@ describe("ServiceRepository", () => {
     });
 
     it("should call list endpoint with pagination params and return paginated data", async () => {
+        const mockPaginatedResponse = createPaginatedServices();
         httpClientMock.get.mockResolvedValue(mockPaginatedResponse);
 
         const result = await serviceRepository.list({ pageNumber: 1, pageSize: 10, search: "" });
@@ -45,7 +29,7 @@ describe("ServiceRepository", () => {
     });
 
     it("should build query with custom page and pageSize", async () => {
-        httpClientMock.get.mockResolvedValue(mockPaginatedResponse);
+        httpClientMock.get.mockResolvedValue(createPaginatedServices());
 
         await serviceRepository.list({ pageNumber: 3, pageSize: 25, search: "" });
 
@@ -53,7 +37,7 @@ describe("ServiceRepository", () => {
     });
 
     it("should append search param when search is provided", async () => {
-        httpClientMock.get.mockResolvedValue(mockPaginatedResponse);
+        httpClientMock.get.mockResolvedValue(createPaginatedServices());
 
         await serviceRepository.list({ pageNumber: 1, pageSize: 10, search: "banho" });
 
@@ -63,7 +47,7 @@ describe("ServiceRepository", () => {
     });
 
     it("should not append search param when search is empty", async () => {
-        httpClientMock.get.mockResolvedValue(mockPaginatedResponse);
+        httpClientMock.get.mockResolvedValue(createPaginatedServices());
 
         await serviceRepository.list({ pageNumber: 1, pageSize: 10, search: "" });
 
@@ -72,7 +56,7 @@ describe("ServiceRepository", () => {
     });
 
     it("should pass whitespace search through to backend sanitization", async () => {
-        httpClientMock.get.mockResolvedValue(mockPaginatedResponse);
+        httpClientMock.get.mockResolvedValue(createPaginatedServices());
 
         await serviceRepository.list({ pageNumber: 1, pageSize: 10, search: "   " });
 
@@ -82,7 +66,7 @@ describe("ServiceRepository", () => {
     });
 
     it("should encode special characters in search term", async () => {
-        httpClientMock.get.mockResolvedValue(mockPaginatedResponse);
+        httpClientMock.get.mockResolvedValue(createPaginatedServices());
 
         await serviceRepository.list({ pageNumber: 1, pageSize: 10, search: "banho & tosa" });
 
@@ -92,11 +76,10 @@ describe("ServiceRepository", () => {
     });
 
     it("should request correct page beyond first", async () => {
-        const pageTwoResponse: PaginatedResponse<VeterinaryService> = {
-            ...mockPaginatedResponse,
+        const pageTwoResponse = createPaginatedServices({
             pageNumber: 2,
             hasPreviousPage: true,
-        };
+        });
 
         httpClientMock.get.mockResolvedValue(pageTwoResponse);
 
@@ -116,17 +99,13 @@ describe("ServiceRepository", () => {
     });
 
     it("should handle empty result set from api", async () => {
-        const emptyResponse: PaginatedResponse<VeterinaryService> = {
-            items: [],
-            totalCount: 0,
-            pageNumber: 1,
-            pageSize: 10,
-            totalPages: 0,
-            hasPreviousPage: false,
-            hasNextPage: false,
-        };
-
-        httpClientMock.get.mockResolvedValue(emptyResponse);
+        httpClientMock.get.mockResolvedValue(
+            createPaginatedServices({
+                items: [],
+                totalCount: 0,
+                totalPages: 0,
+            }),
+        );
 
         const result = await serviceRepository.list({ pageNumber: 1, pageSize: 10, search: "" });
 
@@ -134,35 +113,44 @@ describe("ServiceRepository", () => {
         expect(result.totalCount).toBe(0);
     });
 
-        it("should call register endpoint with correct payload", async () => {
-            httpClientMock.post.mockResolvedValue(undefined);
+    it("should call register endpoint with correct payload", async () => {
+        httpClientMock.post.mockResolvedValue(undefined);
 
-            const payload: ServicePayload = {
-                name: "Banho e Tosa",
-                description: "Higiene completa",
-                durationInMinutes: 60,
-                price: 90,
-                requiresVeterinarian: false,
-            };
+        const payload = createServicePayload();
 
-            await serviceRepository.register(payload);
+        await serviceRepository.register(payload);
 
-            expect(httpClientMock.post).toHaveBeenCalledWith("/api/services", payload);
+        expect(httpClientMock.post).toHaveBeenCalledWith("/api/services", payload);
+    });
+
+    it("should propagate errors from register endpoint", async () => {
+        httpClientMock.post.mockRejectedValue(new Error("Name already exists"));
+
+        await expect(
+            serviceRepository.register(createServicePayload({ name: "Duplicado" })),
+        ).rejects.toThrow("Name already exists");
+    });
+
+    it("should call update endpoint with service id and payload", async () => {
+        httpClientMock.put.mockResolvedValue(undefined);
+
+        const payload = createServicePayload({
+            name: "Banho Editado",
+            durationInMinutes: 45,
+            price: 120,
+            requiresVeterinarian: true,
         });
 
-        it("should propagate errors from register endpoint", async () => {
-            httpClientMock.post.mockRejectedValue(new Error("Name already exists"));
+        await serviceRepository.update("service-1", payload);
 
-            const payload: ServicePayload = {
-                name: "Duplicado",
-                description: null,
-                durationInMinutes: 30,
-                price: 50,
-                requiresVeterinarian: true,
-            };
+        expect(httpClientMock.put).toHaveBeenCalledWith("/api/services/service-1", payload);
+    });
 
-            await expect(serviceRepository.register(payload)).rejects.toThrow(
-                "Name already exists",
-            );
-        });
+    it("should propagate errors from update endpoint", async () => {
+        httpClientMock.put.mockRejectedValue(new Error("Service not found"));
+
+        await expect(serviceRepository.update("service-1", createServicePayload())).rejects.toThrow(
+            "Service not found",
+        );
+    });
 });
