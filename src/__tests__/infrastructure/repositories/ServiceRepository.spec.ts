@@ -153,4 +153,20 @@ describe("ServiceRepository", () => {
             "Service not found",
         );
     });
+
+        it("should call delete endpoint with service id", async () => {
+            httpClientMock.delete.mockResolvedValue(undefined);
+
+            await serviceRepository.remove("service-1");
+
+            expect(httpClientMock.delete).toHaveBeenCalledWith("/api/services/service-1");
+        });
+
+        it("should propagate errors from delete endpoint", async () => {
+            httpClientMock.delete.mockRejectedValue(new Error("Service not found"));
+
+            await expect(serviceRepository.remove("service-1")).rejects.toThrow(
+                "Service not found",
+            );
+        });
 });
