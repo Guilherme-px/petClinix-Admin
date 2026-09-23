@@ -17,6 +17,7 @@ const mountDialog = (
     props: {
         title?: string;
         message?: string;
+        icon?: string;
         confirmLabel?: string;
         confirmColor?: string;
         loading?: boolean;
@@ -49,6 +50,28 @@ describe("ConfirmDialog", () => {
         expect(buttons).toHaveLength(2);
         expect(buttons[0]!.text()).toBe("Cancelar");
         expect(buttons[1]!.text()).toBe("Confirmar");
+    });
+
+    it("should render banner with default icon and color", () => {
+        const wrapper = mountDialog();
+
+        const banner = wrapper.find(".confirm-dialog__banner");
+        expect(banner.exists()).toBe(true);
+        expect(banner.classes()).toContain("bg-primary");
+
+        const icon = banner.find(".q-icon");
+        expect(icon.exists()).toBe(true);
+        expect(icon.text()).toContain("help");
+    });
+
+    it("should render custom icon and banner color", () => {
+        const wrapper = mountDialog({ icon: "delete_forever", confirmColor: "negative" });
+
+        const banner = wrapper.find(".confirm-dialog__banner");
+        expect(banner.classes()).toContain("bg-negative");
+
+        const icon = banner.find(".q-icon");
+        expect(icon.text()).toContain("delete_forever");
     });
 
     it("should render nothing when closed", () => {
