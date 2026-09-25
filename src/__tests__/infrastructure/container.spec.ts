@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { container } from "@/infrastructure/container";
+import { container } from "../../infrastructure/container";
 
 describe("Container", () => {
     it("should resolve a registered service", () => {
