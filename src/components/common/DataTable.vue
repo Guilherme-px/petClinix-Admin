@@ -48,8 +48,21 @@
             </template>
 
             <template #no-data>
-                <div class="full-width row justify-center q-pa-lg text-grey-7">
-                    {{ table.loading.value ? "Carregando..." : "Nenhum registro encontrado" }}
+                <div v-if="table.isFiltered.value" class="full-width column flex-center q-pa-lg">
+                    <div class="text-subtitle1 text-grey-7">
+                        Nenhum resultado para "{{ table.search.value }}"
+                    </div>
+                    <q-btn
+                        flat
+                        dense
+                        label="Limpar busca"
+                        color="primary"
+                        class="q-mt-sm"
+                        @click="table.clearSearch"
+                    />
+                </div>
+                <div v-else class="full-width row justify-center q-pa-lg text-grey-7">
+                    Nenhum registro encontrado
                 </div>
             </template>
         </q-table>
