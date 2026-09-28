@@ -22,6 +22,7 @@ export const useDataTable = <T>(
     const rows: Ref<T[]> = ref([]);
     const loading = ref(false);
     const search = ref("");
+    const isFiltered = ref(false);
 
     const pagination = ref<TablePagination>({
         page: 1,
@@ -74,7 +75,15 @@ export const useDataTable = <T>(
 
     const setSearch = (value: string) => {
         search.value = value;
+        isFiltered.value = value.trim().length > 0;
         onSearch();
+    };
+
+    const clearSearch = () => {
+        search.value = "";
+        isFiltered.value = false;
+        pagination.value.page = 1;
+        void load();
     };
 
     const refresh = () => load();
@@ -94,6 +103,8 @@ export const useDataTable = <T>(
         setSearch,
         setPagination,
         refresh,
+        clearSearch,
+        isFiltered,
     };
 };
 
