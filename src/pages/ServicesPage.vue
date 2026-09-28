@@ -11,7 +11,14 @@
             />
         </template>
 
-        <DataTable :table="table" :columns="columns">
+        <EmptyState
+            v-if="showEmptyState"
+            :image="emptyServicesImage"
+            title="Nenhum serviço cadastrado"
+            description="Cadastre os serviços que a clínica oferece para começar a agendar."
+        />
+
+        <DataTable v-else :table="table" :columns="columns">
             <template #body-cell-price="{ row, props }">
                 <q-td :props="props" align="center">
                     {{ formatPrice(row.price) }}
@@ -129,6 +136,8 @@ import { getErrorMessage } from "@/infrastructure/http/errorHandler";
 import type { CatalogService } from "@/application/services/catalogService";
 import type { ServicePayload, VeterinaryService } from "@/domain/models/VeterinaryService";
 import ServiceFormDialog from "@/components/forms/ServiceFormDialog.vue";
+import EmptyState from "@/components/common/EmptyState.vue";
+import emptyServicesImage from "@/assets/services.svg";
 
 const $q = useQuasar();
 const catalogService = container.resolve<CatalogService>("CatalogService");
@@ -170,6 +179,11 @@ const columns: QTableColumn[] = [
     },
     { name: "actions", label: "Ações", field: "", align: "center" },
 ];
+
+const showEmptyState = computed(
+    () =>
+        !table.loading.value && table.pagination.value.rowsNumber === 0 && !table.isFiltered.value,
+);
 
 const table = useDataTable<VeterinaryService>((params) => catalogService.list(params), {
     onError: (error) =>
