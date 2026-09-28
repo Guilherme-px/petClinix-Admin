@@ -160,7 +160,8 @@ const columns: QTableColumn[] = [
 ];
 
 const showEmptyState = computed(
-    () => !table.loading.value && table.pagination.value.rowsNumber === 0,
+    () =>
+        !table.loading.value && table.pagination.value.rowsNumber === 0 && !table.isFiltered.value,
 );
 
 const table = useDataTable<StaffMember>((params) => staffService.list(params), {
