@@ -7,6 +7,7 @@ import ConfirmDialog from "../../components/common/ConfirmDialog.vue";
 import ServiceFormDialog from "../../components/forms/ServiceFormDialog.vue";
 import type { FetchParams, PaginatedResponse } from "../../domain/models/pagination";
 import type { ServicePayload, VeterinaryService } from "../../domain/models/VeterinaryService";
+import EmptyState from "../../components/common/EmptyState.vue";
 import {
     createMockService,
     createServicePayload,
@@ -104,14 +105,6 @@ describe("ServicesPage", () => {
         });
         expect(wrapper.text()).toContain("Banho e Tosa");
         expect(wrapper.text()).toContain("Consulta");
-    });
-
-    it("should show empty state when api returns no services", async () => {
-        setupContainer(createPaginatedServices({ items: [], totalCount: 0 }));
-        const wrapper = mountPage();
-        await flushPromises();
-
-        expect(wrapper.text()).toContain("Nenhum registro encontrado");
     });
 
     it("should notify error when loading fails", async () => {
@@ -453,5 +446,24 @@ describe("ServicesPage", () => {
         expect(cardText).toContain("Texto completo");
         expect(cardText).toContain("Requer veterinário");
         expect(cardText).toContain("Sem duração fixa");
+    });
+
+    it("should render empty state instead of table when list is empty", async () => {
+        setupContainer(createPaginatedServices({ items: [], totalCount: 0 }));
+        const wrapper = mountPage();
+        await flushPromises();
+
+        expect(wrapper.findComponent(EmptyState).exists()).toBe(true);
+        expect(wrapper.text()).toContain("Nenhum serviço cadastrado");
+        expect(wrapper.find("thead").exists()).toBe(false);
+    });
+
+    it("should render table when list has results", async () => {
+        setupContainer();
+        const wrapper = mountPage();
+        await flushPromises();
+
+        expect(wrapper.findComponent(EmptyState).exists()).toBe(false);
+        expect(wrapper.find("thead").exists()).toBe(true);
     });
 });
