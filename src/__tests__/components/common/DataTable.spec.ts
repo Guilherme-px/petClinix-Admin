@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { mount, flushPromises } from "@vue/test-utils";
-import { Quasar, QCard } from "quasar";
+import { Quasar, QCard, QBtn } from "quasar";
 import { h } from "vue";
 import DataTable from "../../../components/common/DataTable.vue";
 import { useDataTable } from "../../../composables/useDataTable";
@@ -257,5 +257,75 @@ describe("DataTable", () => {
         expect(setPaginationSpy).toHaveBeenCalledWith(
             expect.objectContaining({ page: 3, rowsPerPage: 25 }),
         );
+    });
+
+    it("should show generic empty message when no data and no search", async () => {
+        const emptyResponse: PaginatedResponse<VeterinaryService> = {
+            ...mockResponse,
+            items: [],
+            totalCount: 0,
+        };
+        const table = await createController(emptyResponse);
+        const wrapper = mount(DataTable, {
+            props: {
+                table,
+                columns: [{ name: "name", label: "Nome", field: "name", align: "left" }],
+            },
+            global: { plugins: [Quasar] },
+        });
+        await flushPromises();
+
+        expect(wrapper.text()).toContain("Nenhum registro encontrado");
+        expect(wrapper.text()).not.toContain("Limpar busca");
+    });
+
+    it("should show search message with clear button when filtered and empty", async () => {
+        const emptyResponse: PaginatedResponse<VeterinaryService> = {
+            ...mockResponse,
+            items: [],
+            totalCount: 0,
+        };
+        const table = await createController(emptyResponse);
+        table.isFiltered.value = true;
+
+        const wrapper = mount(DataTable, {
+            props: {
+                table,
+                columns: [{ name: "name", label: "Nome", field: "name", align: "left" }],
+            },
+            global: { plugins: [Quasar] },
+        });
+        await flushPromises();
+
+        expect(wrapper.text()).toContain('Nenhum resultado para ""');
+        expect(wrapper.text()).toContain("Limpar busca");
+    });
+
+    it("should call clearSearch when clear button is clicked", async () => {
+        const emptyResponse: PaginatedResponse<VeterinaryService> = {
+            ...mockResponse,
+            items: [],
+            totalCount: 0,
+        };
+        const table = await createController(emptyResponse);
+        table.isFiltered.value = true;
+        const clearSearchSpy = vi.spyOn(table, "clearSearch");
+
+        const wrapper = mount(DataTable, {
+            props: {
+                table,
+                columns: [{ name: "name", label: "Nome", field: "name", align: "left" }],
+            },
+            global: { plugins: [Quasar] },
+        });
+        await flushPromises();
+
+        const clearButton = wrapper
+            .findAllComponents(QBtn)
+            .find((b) => b.props("label") === "Limpar busca")!;
+        await clearButton.trigger("click");
+        await flushPromises();
+
+        expect(clearSearchSpy).toHaveBeenCalledTimes(1);
     });
 });
