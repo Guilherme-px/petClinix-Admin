@@ -5,6 +5,8 @@ import { createAuthService } from "@/application/services/authService";
 import { createCatalogService } from "@/application/services/catalogService";
 import { StaffRepository } from "./repositories/StaffRepository";
 import { createStaffService } from "@/application/services/staffService";
+import { TutorRepository } from "./repositories/TutorRepository";
+import { createTutorService } from "@/application/services/tutorService";
 
 /* v8 ignore next 1: Fallback para ambiente de dev */
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5180";
@@ -22,6 +24,8 @@ class Container {
         const catalogService = createCatalogService(serviceRepository);
         const staffRepository = new StaffRepository(this.httpClient);
         const staffService = createStaffService(staffRepository);
+        const tutorRepository = new TutorRepository(this.httpClient);
+        const tutorService = createTutorService(tutorRepository);
 
         this.services.set("IAuthRepository", authRepository);
         this.services.set("AuthService", authService);
@@ -29,6 +33,8 @@ class Container {
         this.services.set("CatalogService", catalogService);
         this.services.set("IStaffRepository", staffRepository);
         this.services.set("StaffService", staffService);
+        this.services.set("ITutorRepository", tutorRepository);
+        this.services.set("TutorService", tutorService);
     }
 
     /* v8 ignore next 4: Singleton pattern, instance creation is covered by module load */
