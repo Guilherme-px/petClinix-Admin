@@ -18,7 +18,7 @@
             description="Cadastre o primeiro profissional para começar a atender seus clientes."
         />
 
-        <DataTable v-else :table="table" :columns="columns">
+        <DataTable v-else :table="table" :columns="columns" ref="dataTableRef">
             <template #body-cell-role="{ row, props }">
                 <q-td :props="props" align="center">
                     {{ STAFF_ROLE_LABELS[row.role as StaffRole] ?? row.role }}
@@ -123,6 +123,7 @@ import type {
 import { STAFF_ROLE_LABELS } from "@/domain/models/Staff";
 import EmptyState from "@/components/common/EmptyState.vue";
 import emptyStaffImage from "@/assets/empty-staff.svg";
+import { formatPhone } from "@/utils/formatters";
 
 const $q = useQuasar();
 const staffService = container.resolve<StaffService>("StaffService");
@@ -132,13 +133,7 @@ const selectedStaff = ref<StaffMember | null>(null);
 const isFormOpen = ref(false);
 const isSubmitting = ref(false);
 const isDeleting = ref(false);
-
-const formatPhone = (value: string) => {
-    const digits = value.replace(/\D/g, "");
-    if (digits.length === 11) return digits.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
-    if (digits.length === 10) return digits.replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3");
-    return value;
-};
+const dataTableRef = ref<InstanceType<typeof DataTable> | null>(null);
 
 const columns: QTableColumn[] = [
     { name: "name", label: "Nome", field: "name", align: "left" },
@@ -158,11 +153,6 @@ const columns: QTableColumn[] = [
     },
     { name: "actions", label: "Ações", field: "", align: "center" },
 ];
-
-const showEmptyState = computed(
-    () =>
-        !table.loading.value && table.pagination.value.rowsNumber === 0 && !table.isFiltered.value,
-);
 
 const table = useDataTable<StaffMember>((params) => staffService.list(params), {
     onError: (error) =>
@@ -189,6 +179,7 @@ const deleteMessage = computed(() =>
         ? `Deseja realmente excluir o profissional "${selectedStaff.value.name}"? Esta ação não pode ser desfeita.`
         : "",
 );
+const showEmptyState = computed(() => dataTableRef.value?.showEmptyState ?? false);
 
 const openDelete = (row: StaffMember) => {
     selectedStaff.value = row;
