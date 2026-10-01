@@ -93,6 +93,15 @@ const slots = useSlots();
 const passThroughSlots = computed(() =>
     Object.fromEntries(Object.entries(slots).filter(([name]) => name !== "top-actions")),
 );
+
+const showEmptyState = computed(
+    () =>
+        !props.table.loading.value &&
+        props.table.pagination.value.rowsNumber === 0 &&
+        !props.table.isFiltered.value,
+);
+
+defineExpose({ showEmptyState });
 </script>
 
 <style scoped>
