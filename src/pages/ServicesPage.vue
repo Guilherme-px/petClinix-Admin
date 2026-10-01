@@ -18,7 +18,7 @@
             description="Cadastre os serviços que a clínica oferece para começar a agendar."
         />
 
-        <DataTable v-else :table="table" :columns="columns">
+        <DataTable v-else :table="table" :columns="columns" ref="dataTableRef">
             <template #body-cell-price="{ row, props }">
                 <q-td :props="props" align="center">
                     {{ formatPrice(row.price) }}
@@ -138,6 +138,7 @@ import type { ServicePayload, VeterinaryService } from "@/domain/models/Veterina
 import ServiceFormDialog from "@/components/forms/ServiceFormDialog.vue";
 import EmptyState from "@/components/common/EmptyState.vue";
 import emptyServicesImage from "@/assets/services.svg";
+import { formatDuration } from "@/utils/formatters";
 
 const $q = useQuasar();
 const catalogService = container.resolve<CatalogService>("CatalogService");
@@ -147,17 +148,7 @@ const selectedService = ref<VeterinaryService | null>(null);
 const isFormOpen = ref(false);
 const isSubmitting = ref(false);
 const isDeleting = ref(false);
-
-const formatDuration = (minutes: number) => {
-    if (minutes === 0) return "Sem duração fixa";
-    if (minutes < 60) return `${minutes} min`;
-
-    const hours = Math.floor(minutes / 60);
-    const remainingMinutes = minutes % 60;
-
-    if (remainingMinutes === 0) return `${hours}h`;
-    return `${hours}h ${remainingMinutes}min`;
-};
+const dataTableRef = ref<InstanceType<typeof DataTable> | null>(null);
 
 const columns: QTableColumn[] = [
     { name: "name", label: "Nome", field: "name", align: "left" },
@@ -179,11 +170,6 @@ const columns: QTableColumn[] = [
     },
     { name: "actions", label: "Ações", field: "", align: "center" },
 ];
-
-const showEmptyState = computed(
-    () =>
-        !table.loading.value && table.pagination.value.rowsNumber === 0 && !table.isFiltered.value,
-);
 
 const table = useDataTable<VeterinaryService>((params) => catalogService.list(params), {
     onError: (error) =>
@@ -213,6 +199,7 @@ const deleteMessage = computed(() =>
         ? `Deseja realmente excluir o serviço "${selectedService.value.name}"? Esta ação não pode ser desfeita.`
         : "",
 );
+const showEmptyState = computed(() => dataTableRef.value?.showEmptyState ?? false);
 
 const openDelete = (row: VeterinaryService) => {
     selectedService.value = row;
