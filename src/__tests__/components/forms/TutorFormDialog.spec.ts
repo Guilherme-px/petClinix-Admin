@@ -1,32 +1,15 @@
 import { describe, it, expect, vi } from "vitest";
 import { mount, flushPromises } from "@vue/test-utils";
 import { QBtn } from "quasar";
-import { defineComponent, h } from "vue";
 import TutorFormDialog from "../../../components/forms/TutorFormDialog.vue";
 import type { Tutor } from "../../../domain/models/Tutor";
 import { validationsMock } from "../../../test/mocks/useValidations";
 import { findInputByLabel, setInput } from "../../../test/helpers/quasarUtils";
+import { QDialogStub, QExpansionItemStub } from "../../../test/helpers/stubs";
 
 vi.mock("@/composables/useValidations", () => ({
     useValidations: () => validationsMock,
 }));
-
-const QDialogStub = defineComponent({
-    name: "QDialogStub",
-    props: { modelValue: { type: Boolean, default: false } },
-    emits: ["update:modelValue"],
-    setup(props, { slots }) {
-        return () => (props.modelValue ? slots.default?.() : null);
-    },
-});
-
-const QExpansionItemStub = defineComponent({
-    name: "QExpansionItemStub",
-    props: { label: { type: String, default: "" } },
-    setup(props, { slots }) {
-        return () => h("div", [h("div", props.label), slots.default?.()]);
-    },
-});
 
 const mockTutor: Tutor = {
     id: "tutor-1",

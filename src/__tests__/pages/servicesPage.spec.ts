@@ -1,18 +1,19 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { mount, flushPromises } from "@vue/test-utils";
 import { QBtn } from "quasar";
-import { defineComponent } from "vue";
 import ServicesPage from "../../pages/ServicesPage.vue";
 import ConfirmDialog from "../../components/common/ConfirmDialog.vue";
 import ServiceFormDialog from "../../components/forms/ServiceFormDialog.vue";
+import EmptyState from "../../components/common/EmptyState.vue";
 import type { FetchParams, PaginatedResponse } from "../../domain/models/pagination";
 import type { ServicePayload, VeterinaryService } from "../../domain/models/VeterinaryService";
-import EmptyState from "../../components/common/EmptyState.vue";
 import {
     createMockService,
     createServicePayload,
     createPaginatedServices,
 } from "../../test/factories/catalogFactory";
+import { QDialogStub, QPageStub, QTooltipStub } from "../../test/helpers/stubs";
+import { screenState } from "../../test/helpers/mockQuasar";
 
 vi.mock("@/infrastructure/container", () => ({
     container: {
@@ -21,8 +22,6 @@ vi.mock("@/infrastructure/container", () => ({
 }));
 
 import { container } from "../../infrastructure/container";
-
-const screenState = { lt: { sm: false } };
 
 vi.mock("quasar", async (importOriginal) => {
     const actual = await importOriginal<typeof import("quasar")>();
@@ -41,20 +40,13 @@ const registerMock = vi.fn<(payload: ServicePayload) => Promise<void>>();
 const updateMock = vi.fn<(id: string, payload: ServicePayload) => Promise<void>>();
 const removeMock = vi.fn<(id: string) => Promise<void>>();
 
-const SlotStub = defineComponent({
-    name: "SlotStub",
-    setup(_, { slots }) {
-        return () => slots.default?.();
-    },
-});
-
 const mountPage = () =>
     mount(ServicesPage, {
         global: {
             stubs: {
-                QDialog: SlotStub,
-                QTooltip: SlotStub,
-                QPage: SlotStub,
+                QDialog: QDialogStub,
+                QTooltip: QTooltipStub,
+                QPage: QPageStub,
             },
         },
     });
@@ -107,9 +99,8 @@ describe("ServicesPage", () => {
     });
 
     it("should notify error when loading fails", async () => {
-        listMock.mockRejectedValue(new Error("Network Error"));
         setupContainer();
-        listMock.mockRejectedValueOnce(new Error("Network Error"));
+        listMock.mockRejectedValue(new Error("Network Error"));
 
         mountPage();
         await flushPromises();

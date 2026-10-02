@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { mount, flushPromises } from "@vue/test-utils";
 import { QBtn } from "quasar";
-import { defineComponent } from "vue";
 import StaffPage from "../../pages/StaffPage.vue";
 import EmptyState from "../../components/common/EmptyState.vue";
 import ConfirmDialog from "../../components/common/ConfirmDialog.vue";
@@ -18,6 +17,8 @@ import {
     createRegisterStaffPayload,
     createPaginatedStaff,
 } from "../../test/factories/staffFactory";
+import { QDialogStub, QPageStub, QTooltipStub } from "../../test/helpers/stubs";
+import { screenState } from "../../test/helpers/mockQuasar";
 
 vi.mock("@/infrastructure/container", () => ({
     container: {
@@ -26,8 +27,6 @@ vi.mock("@/infrastructure/container", () => ({
 }));
 
 import { container } from "../../infrastructure/container";
-
-const screenState = { lt: { sm: false } };
 
 vi.mock("quasar", async (importOriginal) => {
     const actual = await importOriginal<typeof import("quasar")>();
@@ -42,24 +41,18 @@ vi.mock("quasar", async (importOriginal) => {
 
 const notifyMock = vi.fn<(opts: Record<string, unknown>) => void>();
 const listMock = vi.fn<(params: FetchParams) => Promise<PaginatedResponse<StaffMember>>>();
+const getByIdMock = vi.fn<(id: string) => Promise<StaffMember>>();
 const registerMock = vi.fn<(payload: RegisterStaffPayload) => Promise<void>>();
 const updateMock = vi.fn<(id: string, payload: UpdateStaffPayload) => Promise<void>>();
 const removeMock = vi.fn<(id: string) => Promise<void>>();
-
-const SlotStub = defineComponent({
-    name: "SlotStub",
-    setup(_, { slots }) {
-        return () => slots.default?.();
-    },
-});
 
 const mountPage = () =>
     mount(StaffPage, {
         global: {
             stubs: {
-                QDialog: SlotStub,
-                QTooltip: SlotStub,
-                QPage: SlotStub,
+                QDialog: QDialogStub,
+                QTooltip: QTooltipStub,
+                QPage: QPageStub,
             },
         },
     });
@@ -67,7 +60,7 @@ const mountPage = () =>
 const setupContainer = (response?: PaginatedResponse<StaffMember>) => {
     vi.mocked(container.resolve).mockReturnValue({
         list: listMock,
-        getById: vi.fn<(id: string) => Promise<StaffMember>>(),
+        getById: getByIdMock,
         register: registerMock,
         update: updateMock,
         remove: removeMock,
@@ -87,6 +80,7 @@ describe("StaffPage", () => {
         screenState.lt.sm = false;
         notifyMock.mockClear();
         listMock.mockReset();
+        getByIdMock.mockReset();
         registerMock.mockReset().mockResolvedValue(undefined);
         updateMock.mockReset().mockResolvedValue(undefined);
         removeMock.mockReset().mockResolvedValue(undefined);

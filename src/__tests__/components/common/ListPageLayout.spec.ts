@@ -1,16 +1,8 @@
 import { describe, it, expect } from "vitest";
 import { mount } from "@vue/test-utils";
-import { Quasar } from "quasar";
-import { defineComponent, h } from "vue";
+import { h } from "vue";
 import ListPageLayout from "../../../components/common/ListPageLayout.vue";
-
-const SlotStub = defineComponent({
-    name: "QPageStub",
-    inheritAttrs: false,
-    setup(_, { slots }) {
-        return () => slots.default?.();
-    },
-});
+import { QPageStub } from "../../../test/helpers/stubs";
 
 describe("ListPageLayout", () => {
     const mountLayout = (
@@ -20,8 +12,7 @@ describe("ListPageLayout", () => {
             props: { title: "Serviços" },
             slots,
             global: {
-                plugins: [Quasar],
-                stubs: { QPage: SlotStub },
+                stubs: { QPage: QPageStub },
             },
         });
 

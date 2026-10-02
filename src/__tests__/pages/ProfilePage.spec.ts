@@ -1,11 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { mount, flushPromises, type VueWrapper } from "@vue/test-utils";
-import { defineComponent, nextTick, ref } from "vue";
+import { mount, flushPromises } from "@vue/test-utils";
+import { nextTick, ref } from "vue";
 import ProfilePage from "../../pages/ProfilePage.vue";
 import UserForm from "../../components/profile/UserForm.vue";
 import ClinicForm from "../../components/profile/ClinicForm.vue";
 import type { User, UpdateAccountPayload } from "../../domain/models/Auth";
 import { createMockUser, createMockClinic } from "../../test/factories/authFactory";
+import { QPageStub, QExpansionItemStub } from "../../test/helpers/stubs";
 
 const updateAccountMock = vi
     .fn<(payload: UpdateAccountPayload) => Promise<void>>()
@@ -24,38 +25,30 @@ vi.mock("@/stores/auth", () => ({
     }),
 }));
 
-const SlotStub = defineComponent({
-    name: "SlotStub",
-    setup(_, { slots }) {
-        return () => slots.default?.();
-    },
+vi.mock("quasar", async (importOriginal) => {
+    const actual = await importOriginal<typeof import("quasar")>();
+    return {
+        ...actual,
+        useQuasar: () => ({
+            notify: notifyMock,
+        }),
+    };
 });
 
-let notifySpy = vi.fn<(opts: Record<string, unknown>) => void>();
+const notifyMock = vi.fn<(opts: Record<string, unknown>) => void>();
 
-const mountPage = () => {
-    const wrapper = mount(ProfilePage, {
+const mountPage = () =>
+    mount(ProfilePage, {
         global: {
             stubs: {
-                QPage: SlotStub,
-                QExpansionItem: SlotStub,
+                QPage: QPageStub,
+                QExpansionItem: QExpansionItemStub,
             },
         },
     });
 
-    const $q = (
-        wrapper.vm.$.appContext.config.globalProperties as unknown as {
-            $q: { notify: unknown };
-        }
-    ).$q;
-    notifySpy = vi.fn<(opts: Record<string, unknown>) => void>();
-    $q.notify = notifySpy;
-
-    return wrapper;
-};
-
 const submitFrom = async (
-    wrapper: VueWrapper,
+    wrapper: ReturnType<typeof mount>,
     component: typeof UserForm | typeof ClinicForm,
     payload: Partial<UpdateAccountPayload> = {},
 ) => {
@@ -114,11 +107,11 @@ describe("ProfilePage", () => {
 
     it("should show positive notification on user update success", async () => {
         userState.value = createMockUser({ clinic: createMockClinic() });
-        mountPage();
+        const wrapper = mountPage();
 
-        await submitFrom(mountPage(), UserForm, { userName: "Novo Nome" });
+        await submitFrom(wrapper, UserForm, { userName: "Novo Nome" });
 
-        expect(notifySpy).toHaveBeenCalledWith(
+        expect(notifyMock).toHaveBeenCalledWith(
             expect.objectContaining({ type: "positive", message: "Dados pessoais atualizados!" }),
         );
     });
@@ -129,7 +122,7 @@ describe("ProfilePage", () => {
 
         await submitFrom(wrapper, ClinicForm, { clinicTradeName: "Nova Clinica" });
 
-        expect(notifySpy).toHaveBeenCalledWith(
+        expect(notifyMock).toHaveBeenCalledWith(
             expect.objectContaining({ type: "positive", message: "Dados da clínica atualizados!" }),
         );
     });
@@ -141,7 +134,7 @@ describe("ProfilePage", () => {
 
         await submitFrom(wrapper, UserForm, { userName: "Novo Nome" });
 
-        expect(notifySpy).toHaveBeenCalledWith(
+        expect(notifyMock).toHaveBeenCalledWith(
             expect.objectContaining({ type: "negative", message: "Erro ao atualizar dados." }),
         );
         expect(wrapper.findComponent(UserForm).props("isLoading")).toBe(false);
@@ -154,7 +147,7 @@ describe("ProfilePage", () => {
 
         await submitFrom(wrapper, ClinicForm, { clinicTradeName: "Nova Clinica" });
 
-        expect(notifySpy).toHaveBeenCalledWith(
+        expect(notifyMock).toHaveBeenCalledWith(
             expect.objectContaining({ type: "negative", message: "Erro ao atualizar clínica." }),
         );
         expect(wrapper.findComponent(ClinicForm).props("isLoading")).toBe(false);

@@ -1,17 +1,8 @@
 import { describe, it, expect } from "vitest";
 import { mount, flushPromises } from "@vue/test-utils";
 import { QBtn } from "quasar";
-import { defineComponent } from "vue";
 import ConfirmDialog from "../../../components/common/ConfirmDialog.vue";
-
-const QDialogStub = defineComponent({
-    name: "QDialogStub",
-    props: { modelValue: { type: Boolean, default: false } },
-    emits: ["update:modelValue"],
-    setup(props, { slots }) {
-        return () => (props.modelValue ? slots.default?.() : null);
-    },
-});
+import { QDialogStub } from "../../../test/helpers/stubs";
 
 const mountDialog = (
     props: {

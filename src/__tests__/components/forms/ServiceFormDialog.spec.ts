@@ -1,31 +1,15 @@
 import { describe, it, expect, vi } from "vitest";
 import { mount, flushPromises } from "@vue/test-utils";
 import { QBtn } from "quasar";
-import { defineComponent } from "vue";
 import ServiceFormDialog from "../../../components/forms/ServiceFormDialog.vue";
 import type { VeterinaryService } from "../../../domain/models/VeterinaryService";
 import { validationsMock } from "../../../test/mocks/useValidations";
 import { findInputByLabel, setInput } from "../../../test/helpers/quasarUtils";
+import { QDialogStub, QTooltipStub } from "../../../test/helpers/stubs";
 
 vi.mock("@/composables/useValidations", () => ({
     useValidations: () => validationsMock,
 }));
-
-const QDialogStub = defineComponent({
-    name: "QDialogStub",
-    props: { modelValue: { type: Boolean, default: false } },
-    emits: ["update:modelValue"],
-    setup(props, { slots }) {
-        return () => (props.modelValue ? slots.default?.() : null);
-    },
-});
-
-const QTooltipStub = defineComponent({
-    name: "QTooltipStub",
-    setup(_, { slots }) {
-        return () => slots.default?.();
-    },
-});
 
 const mockService: VeterinaryService = {
     id: "service-1",
