@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { mount, flushPromises } from "@vue/test-utils";
-import { Quasar, QBtn } from "quasar";
+import { QBtn } from "quasar";
 import { defineComponent } from "vue";
 import ServicesPage from "../../pages/ServicesPage.vue";
 import ConfirmDialog from "../../components/common/ConfirmDialog.vue";
@@ -20,7 +20,7 @@ vi.mock("@/infrastructure/container", () => ({
     },
 }));
 
-import { container } from "@/infrastructure/container";
+import { container } from "../../infrastructure/container";
 
 const screenState = { lt: { sm: false } };
 
@@ -51,7 +51,6 @@ const SlotStub = defineComponent({
 const mountPage = () =>
     mount(ServicesPage, {
         global: {
-            plugins: [Quasar],
             stubs: {
                 QDialog: SlotStub,
                 QTooltip: SlotStub,

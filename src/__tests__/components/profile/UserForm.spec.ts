@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { mount, flushPromises } from "@vue/test-utils";
-import { Quasar, QBtn } from "quasar";
+import { QBtn } from "quasar";
 import UserForm from "../../../components/profile/UserForm.vue";
 import type { User, UpdateAccountPayload } from "../../../domain/models/Auth";
 import { validationsMock } from "../../../test/mocks/useValidations";
@@ -17,9 +17,6 @@ const mountForm = (props: { user?: User | null; isLoading?: boolean } = {}) =>
             user: createMockUser(),
             isLoading: false,
             ...props,
-        },
-        global: {
-            plugins: [Quasar],
         },
     });
 

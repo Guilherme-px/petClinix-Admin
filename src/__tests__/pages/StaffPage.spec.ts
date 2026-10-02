@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { mount, flushPromises } from "@vue/test-utils";
-import { Quasar, QBtn } from "quasar";
+import { QBtn } from "quasar";
 import { defineComponent } from "vue";
 import StaffPage from "../../pages/StaffPage.vue";
 import EmptyState from "../../components/common/EmptyState.vue";
@@ -11,6 +11,7 @@ import type {
     StaffMember,
     RegisterStaffPayload,
     UpdateStaffPayload,
+    StaffRole,
 } from "../../domain/models/Staff";
 import {
     createMockStaff,
@@ -24,7 +25,7 @@ vi.mock("@/infrastructure/container", () => ({
     },
 }));
 
-import { container } from "@/infrastructure/container";
+import { container } from "../../infrastructure/container";
 
 const screenState = { lt: { sm: false } };
 
@@ -55,7 +56,6 @@ const SlotStub = defineComponent({
 const mountPage = () =>
     mount(StaffPage, {
         global: {
-            plugins: [Quasar],
             stubs: {
                 QDialog: SlotStub,
                 QTooltip: SlotStub,

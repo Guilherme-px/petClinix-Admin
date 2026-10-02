@@ -6,13 +6,16 @@ import ListPageLayout from "../../../components/common/ListPageLayout.vue";
 
 const SlotStub = defineComponent({
     name: "QPageStub",
+    inheritAttrs: false,
     setup(_, { slots }) {
         return () => slots.default?.();
     },
 });
 
 describe("ListPageLayout", () => {
-    const mountLayout = (slots: Record<string, unknown> = {}) =>
+    const mountLayout = (
+        slots: { default?: () => ReturnType<typeof h>; actions?: () => ReturnType<typeof h> } = {},
+    ) =>
         mount(ListPageLayout, {
             props: { title: "Serviços" },
             slots,

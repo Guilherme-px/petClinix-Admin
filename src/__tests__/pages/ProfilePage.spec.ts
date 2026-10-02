@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { mount, flushPromises, type VueWrapper } from "@vue/test-utils";
-import { Quasar } from "quasar";
 import { defineComponent, nextTick, ref } from "vue";
 import ProfilePage from "../../pages/ProfilePage.vue";
 import UserForm from "../../components/profile/UserForm.vue";
@@ -37,7 +36,6 @@ let notifySpy = vi.fn<(opts: Record<string, unknown>) => void>();
 const mountPage = () => {
     const wrapper = mount(ProfilePage, {
         global: {
-            plugins: [Quasar],
             stubs: {
                 QPage: SlotStub,
                 QExpansionItem: SlotStub,

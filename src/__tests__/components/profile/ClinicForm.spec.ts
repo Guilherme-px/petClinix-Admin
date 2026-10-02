@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { mount, flushPromises } from "@vue/test-utils";
-import { Quasar, QBtn } from "quasar";
+import { QBtn } from "quasar";
 import ClinicForm from "../../../components/profile/ClinicForm.vue";
 import type { Clinic, UpdateAccountPayload } from "../../../domain/models/Auth";
 import { validationsMock } from "../../../test/mocks/useValidations";
@@ -17,9 +17,6 @@ const mountForm = (props: { clinic?: Clinic | null; isLoading?: boolean } = {}) 
             clinic: createMockClinic(),
             isLoading: false,
             ...props,
-        },
-        global: {
-            plugins: [Quasar],
         },
     });
 

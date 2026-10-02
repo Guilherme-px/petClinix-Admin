@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { mount, flushPromises } from "@vue/test-utils";
-import { Quasar, QBtn } from "quasar";
+import { QBtn } from "quasar";
 import { defineComponent } from "vue";
 import StaffFormDialog from "../../../components/forms/StaffFormDialog.vue";
 import type { StaffMember } from "../../../domain/models/Staff";
@@ -50,7 +50,6 @@ const mountDialog = (
             ...props,
         },
         global: {
-            plugins: [Quasar],
             stubs: { QDialog: QDialogStub, QTooltip: QTooltipStub },
         },
     });

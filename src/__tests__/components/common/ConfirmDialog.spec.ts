@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { mount, flushPromises } from "@vue/test-utils";
-import { Quasar, QBtn } from "quasar";
+import { QBtn } from "quasar";
 import { defineComponent } from "vue";
 import ConfirmDialog from "../../../components/common/ConfirmDialog.vue";
 
@@ -32,7 +32,6 @@ const mountDialog = (
             ...props,
         },
         global: {
-            plugins: [Quasar],
             stubs: { QDialog: QDialogStub },
         },
     });

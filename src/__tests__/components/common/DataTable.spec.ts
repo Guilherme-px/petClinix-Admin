@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { mount, flushPromises } from "@vue/test-utils";
-import { Quasar, QCard, QBtn } from "quasar";
+import { QCard, QBtn } from "quasar";
 import { h } from "vue";
 import DataTable from "../../../components/common/DataTable.vue";
 import { useDataTable } from "../../../composables/useDataTable";
@@ -60,7 +60,6 @@ describe("DataTable", () => {
                     { name: "price", label: "Preço", field: "price", align: "center" },
                 ],
             },
-            global: { plugins: [Quasar] },
         });
         await flushPromises();
 
@@ -76,7 +75,6 @@ describe("DataTable", () => {
                 table,
                 columns: [{ name: "name", label: "Nome", field: "name", align: "left" }],
             },
-            global: { plugins: [Quasar] },
         });
 
         const searchInput = wrapper.find('input[placeholder="Buscar..."]');
@@ -92,7 +90,6 @@ describe("DataTable", () => {
                 table,
                 columns: [{ name: "name", label: "Nome", field: "name", align: "left" }],
             },
-            global: { plugins: [Quasar] },
         });
 
         await wrapper.find('input[placeholder="Buscar..."]').setValue("banho");
@@ -112,7 +109,6 @@ describe("DataTable", () => {
                 table,
                 columns: [{ name: "name", label: "Nome", field: "name", align: "left" }],
             },
-            global: { plugins: [Quasar] },
         });
         await flushPromises();
 
@@ -131,7 +127,6 @@ describe("DataTable", () => {
                 table,
                 columns: [{ name: "name", label: "Nome", field: "name", align: "left" }],
             },
-            global: { plugins: [Quasar] },
         });
 
         expect(table.loading.value).toBe(true);
@@ -149,7 +144,6 @@ describe("DataTable", () => {
                 item: (slotProps: { row: VeterinaryService }) =>
                     h("div", { class: "custom-card" }, `CUSTOM ${slotProps.row.name}`),
             },
-            global: { plugins: [Quasar] },
         });
         await flushPromises();
 
@@ -168,7 +162,6 @@ describe("DataTable", () => {
                     { name: "price", label: "Preço", field: "price", align: "center" },
                 ],
             },
-            global: { plugins: [Quasar] },
         });
         await flushPromises();
 
@@ -186,7 +179,6 @@ describe("DataTable", () => {
                 table,
                 columns: [{ name: "name", label: "Nome", field: "name", align: "left" }],
             },
-            global: { plugins: [Quasar] },
         });
         await flushPromises();
 
@@ -203,7 +195,6 @@ describe("DataTable", () => {
             slots: {
                 "body-cell-price": () => h("td", "R$ CUSTOM"),
             },
-            global: { plugins: [Quasar] },
         });
         await flushPromises();
 
@@ -219,7 +210,6 @@ describe("DataTable", () => {
                 table,
                 columns: [{ name: "name", label: "Nome", field: "name", align: "left" }],
             },
-            global: { plugins: [Quasar] },
         });
         await flushPromises();
 
@@ -244,7 +234,6 @@ describe("DataTable", () => {
                 table,
                 columns: [{ name: "name", label: "Nome", field: "name", align: "left" }],
             },
-            global: { plugins: [Quasar] },
         });
 
         wrapper.findComponent({ name: "QTable" }).vm.$emit("update:pagination", {
@@ -271,7 +260,6 @@ describe("DataTable", () => {
                 table,
                 columns: [{ name: "name", label: "Nome", field: "name", align: "left" }],
             },
-            global: { plugins: [Quasar] },
         });
         await flushPromises();
 
@@ -293,7 +281,6 @@ describe("DataTable", () => {
                 table,
                 columns: [{ name: "name", label: "Nome", field: "name", align: "left" }],
             },
-            global: { plugins: [Quasar] },
         });
         await flushPromises();
 
@@ -316,7 +303,6 @@ describe("DataTable", () => {
                 table,
                 columns: [{ name: "name", label: "Nome", field: "name", align: "left" }],
             },
-            global: { plugins: [Quasar] },
         });
         await flushPromises();
 
