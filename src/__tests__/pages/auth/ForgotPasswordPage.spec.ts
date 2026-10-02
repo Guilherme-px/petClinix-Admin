@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { mount, flushPromises } from "@vue/test-utils";
-import ForgotPasswordPage from "@/pages/auth/ForgotPasswordPage.vue";
+import ForgotPasswordPage from "../../../pages/auth/ForgotPasswordPage.vue";
 
 vi.mock("@/stores/auth", () => ({
     useAuthStore: vi.fn<() => unknown>(),
@@ -32,7 +32,7 @@ vi.mock("@/components/AppLogo.vue", () => ({
     },
 }));
 
-import { useAuthStore } from "@/stores/auth";
+import { useAuthStore } from "../../../stores/auth";
 import { useQuasar } from "quasar";
 import { useRouter } from "vue-router";
 

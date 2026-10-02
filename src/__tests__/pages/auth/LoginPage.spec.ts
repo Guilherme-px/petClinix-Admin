@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { mount } from "@vue/test-utils";
-import LoginPage from "@/pages/auth/LoginPage.vue";
-import LoginForm from "@/components/auth/LoginForm.vue";
-import type { LoginPayload } from "@/domain/models/Auth";
+import LoginPage from "../../../pages/auth/LoginPage.vue";
+import LoginForm from "../../../components/auth/LoginForm.vue";
+import type { LoginPayload } from "../../../domain/models/Auth";
 
 vi.mock("@/stores/auth", () => ({
     useAuthStore: vi.fn<() => unknown>(),
@@ -20,7 +20,7 @@ vi.mock("vue-router", () => ({
     useRouter: vi.fn<() => unknown>(),
 }));
 
-import { useAuthStore } from "@/stores/auth";
+import { useAuthStore } from "../../../stores/auth";
 import { useQuasar } from "quasar";
 import { useRouter } from "vue-router";
 
