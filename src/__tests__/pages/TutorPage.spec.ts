@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { mount, flushPromises } from "@vue/test-utils";
 import { QBtn } from "quasar";
-import { defineComponent, h } from "vue";
 import TutorPage from "../../pages/TutorPage.vue";
 import ConfirmDialog from "../../components/common/ConfirmDialog.vue";
 import TutorFormDialog from "../../components/forms/TutorFormDialog.vue";
@@ -12,6 +11,8 @@ import {
     createRegisterTutorPayload,
     createPaginatedTutors,
 } from "../../test/factories/tutorFactory";
+import { SlotStub, QDialogStub, QExpansionItemStub } from "../../test/helpers/stubs";
+import { screenState } from "../../test/helpers/mockQuasar";
 
 vi.mock("@/infrastructure/container", () => ({
     container: {
@@ -20,8 +21,6 @@ vi.mock("@/infrastructure/container", () => ({
 }));
 
 import { container } from "../../infrastructure/container";
-
-const screenState = { lt: { sm: false } };
 
 vi.mock("quasar", async (importOriginal) => {
     const actual = await importOriginal<typeof import("quasar")>();
@@ -40,35 +39,6 @@ const getByIdMock = vi.fn<(id: string) => Promise<Tutor>>();
 const registerMock = vi.fn<(payload: RegisterTutorPayload) => Promise<void>>();
 const updateMock = vi.fn<(id: string, payload: UpdateTutorPayload) => Promise<void>>();
 const removeMock = vi.fn<(id: string) => Promise<void>>();
-
-const SlotStub = defineComponent({
-    name: "SlotStub",
-    inheritAttrs: false,
-    setup(_, { slots }) {
-        return () => h("div", slots.default?.());
-    },
-});
-
-const QDialogStub = defineComponent({
-    name: "QDialogStub",
-    inheritAttrs: false,
-    props: {
-        modelValue: { type: Boolean, default: false },
-        persistent: { type: Boolean, default: false },
-    },
-    emits: ["update:modelValue"],
-    setup(props, { slots }) {
-        return () => (props.modelValue ? slots.default?.() : null);
-    },
-});
-
-const QExpansionItemStub = defineComponent({
-    name: "QExpansionItemStub",
-    props: { label: { type: String, default: "" } },
-    setup(props, { slots }) {
-        return () => h("div", [h("div", props.label), slots.default?.()]);
-    },
-});
 
 const mountPage = () =>
     mount(TutorPage, {
