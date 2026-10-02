@@ -12,13 +12,13 @@
         </template>
 
         <EmptyState
-            v-if="showEmptyState"
+            v-if="table.showEmptyState.value"
             :image="emptyServicesImage"
             title="Nenhum serviço cadastrado"
             description="Cadastre os serviços que a clínica oferece para começar a agendar."
         />
 
-        <DataTable v-else :table="table" :columns="columns" ref="dataTableRef">
+        <DataTable v-else :table="table" :columns="columns">
             <template #body-cell-price="{ row, props }">
                 <q-td :props="props" align="center">
                     {{ formatPrice(row.price) }}
@@ -148,7 +148,6 @@ const selectedService = ref<VeterinaryService | null>(null);
 const isFormOpen = ref(false);
 const isSubmitting = ref(false);
 const isDeleting = ref(false);
-const dataTableRef = ref<InstanceType<typeof DataTable> | null>(null);
 
 const columns: QTableColumn[] = [
     { name: "name", label: "Nome", field: "name", align: "left" },
@@ -199,7 +198,6 @@ const deleteMessage = computed(() =>
         ? `Deseja realmente excluir o serviço "${selectedService.value.name}"? Esta ação não pode ser desfeita.`
         : "",
 );
-const showEmptyState = computed(() => dataTableRef.value?.showEmptyState ?? false);
 
 const openDelete = (row: VeterinaryService) => {
     selectedService.value = row;

@@ -12,13 +12,13 @@
         </template>
 
         <EmptyState
-            v-if="showEmptyState"
+            v-if="table.showEmptyState.value"
             :image="emptyTutorsImage"
             title="Nenhum tutor cadastrado"
             description="Cadastre o primeiro tutor para começar a atender seus clientes."
         />
 
-        <DataTable ref="dataTableRef" v-else :table="table" :columns="columns">
+        <DataTable v-else :table="table" :columns="columns">
             <template #body-cell-actions="{ row, props }">
                 <q-td :props="props" align="center" class="q-gutter-x-xs">
                     <q-btn flat dense round icon="edit" color="primary" @click="openEdit(row)" />
@@ -123,7 +123,6 @@ const selectedTutor = ref<Tutor | null>(null);
 const isFormOpen = ref(false);
 const isSubmitting = ref(false);
 const isDeleting = ref(false);
-const dataTableRef = ref<InstanceType<typeof DataTable> | null>(null);
 
 const columns: QTableColumn[] = [
     { name: "name", label: "Nome", field: "name", align: "left" },
@@ -132,6 +131,7 @@ const columns: QTableColumn[] = [
         label: "CPF",
         field: "cpf",
         align: "center",
+        format: formatCpf,
     },
     { name: "email", label: "E-mail", field: "email", align: "center" },
     {
@@ -169,8 +169,6 @@ const deleteMessage = computed(() =>
         ? `Deseja realmente excluir o tutor "${selectedTutor.value.name}"? Esta ação não pode ser desfeita.`
         : "",
 );
-
-const showEmptyState = computed(() => dataTableRef.value?.showEmptyState ?? false);
 
 const openDelete = (row: Tutor) => {
     selectedTutor.value = row;

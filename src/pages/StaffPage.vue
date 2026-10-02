@@ -12,13 +12,13 @@
         </template>
 
         <EmptyState
-            v-if="showEmptyState"
+            v-if="table.showEmptyState.value"
             :image="emptyStaffImage"
             title="Nenhum profissional cadastrado"
             description="Cadastre o primeiro profissional para começar a atender seus clientes."
         />
 
-        <DataTable v-else :table="table" :columns="columns" ref="dataTableRef">
+        <DataTable v-else :table="table" :columns="columns">
             <template #body-cell-role="{ row, props }">
                 <q-td :props="props" align="center">
                     {{ STAFF_ROLE_LABELS[row.role as StaffRole] ?? row.role }}
@@ -133,7 +133,6 @@ const selectedStaff = ref<StaffMember | null>(null);
 const isFormOpen = ref(false);
 const isSubmitting = ref(false);
 const isDeleting = ref(false);
-const dataTableRef = ref<InstanceType<typeof DataTable> | null>(null);
 
 const columns: QTableColumn[] = [
     { name: "name", label: "Nome", field: "name", align: "left" },
@@ -179,7 +178,6 @@ const deleteMessage = computed(() =>
         ? `Deseja realmente excluir o profissional "${selectedStaff.value.name}"? Esta ação não pode ser desfeita.`
         : "",
 );
-const showEmptyState = computed(() => dataTableRef.value?.showEmptyState ?? false);
 
 const openDelete = (row: StaffMember) => {
     selectedStaff.value = row;
