@@ -1,4 +1,4 @@
-import { ref, type Ref } from "vue";
+import { computed, ref, type Ref } from "vue";
 import type { FetchParams, PaginatedResponse } from "@/domain/models/pagination";
 
 export interface TablePagination {
@@ -92,6 +92,10 @@ export const useDataTable = <T>(
         pagination.value = value;
     };
 
+    const showEmptyState = computed(
+        () => !loading.value && pagination.value.rowsNumber === 0 && !isFiltered.value,
+    );
+
     return {
         rows,
         loading,
@@ -105,6 +109,7 @@ export const useDataTable = <T>(
         refresh,
         clearSearch,
         isFiltered,
+        showEmptyState,
     };
 };
 
