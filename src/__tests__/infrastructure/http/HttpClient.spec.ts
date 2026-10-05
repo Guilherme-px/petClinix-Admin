@@ -227,4 +227,28 @@ describe("HttpClient", () => {
 
         await expect(client.delete("/api/services/service-1")).rejects.toThrow("Not Found");
     });
+
+    it("should make patch request and return data", async () => {
+        mockInstance.request.mockResolvedValue({ data: { success: true } });
+
+        const result = await client.patch("/api/appointments/appt-1/status", {
+            newStatus: "Canceled",
+        });
+
+        expect(mockInstance.request).toHaveBeenCalledWith({
+            method: "patch",
+            url: "/api/appointments/appt-1/status",
+            data: { newStatus: "Canceled" },
+        });
+        expect(result).toEqual({ success: true });
+    });
+
+    it("should throw error on patch failure", async () => {
+        const error = new Error("Not Found");
+        mockInstance.request.mockRejectedValue(error);
+
+        await expect(
+            client.patch("/api/appointments/appt-1/status", { newStatus: "Canceled" }),
+        ).rejects.toThrow("Not Found");
+    });
 });
