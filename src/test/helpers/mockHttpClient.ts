@@ -5,6 +5,7 @@ export type HttpClientMock = {
     post: Mock<(url: string, data: unknown) => Promise<unknown>>;
     put: Mock<(url: string, data: unknown) => Promise<unknown>>;
     delete: Mock<(url: string) => Promise<unknown>>;
+    patch: Mock<(url: string, data: unknown) => Promise<unknown>>;
     setAuthHandlers: Mock<(refreshFn: () => Promise<string | null>, logoutFn: () => void) => void>;
 };
 
@@ -14,6 +15,7 @@ export function createHttpClientMock(): HttpClientMock {
         post: vi.fn<(url: string, data: unknown) => Promise<unknown>>(),
         put: vi.fn<(url: string, data: unknown) => Promise<unknown>>(),
         delete: vi.fn<(url: string) => Promise<unknown>>(),
+        patch: vi.fn<(url: string, data: unknown) => Promise<unknown>>(),
         setAuthHandlers:
             vi.fn<(refreshFn: () => Promise<string | null>, logoutFn: () => void) => void>(),
     };
