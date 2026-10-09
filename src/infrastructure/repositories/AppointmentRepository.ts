@@ -5,10 +5,15 @@ import type {
     UpdateAppointmentPayload,
     AppointmentStatus,
 } from "@/domain/models/Appointment";
-import type { FetchParams, PaginatedResponse } from "@/domain/models/pagination";
 import { HttpClient } from "@/infrastructure/http/HttpClient";
+import type { AppointmentDto } from "../dtos/AppointmentDto";
 
 const BASE_URL = "/api/appointments";
+
+const toAppointment = (dto: AppointmentDto): Appointment => ({
+    ...dto,
+    scheduledTime: dto.scheduledTime.slice(0, 5),
+});
 
 export class AppointmentRepository implements IAppointmentRepository {
     private httpClient: HttpClient;
@@ -21,22 +26,15 @@ export class AppointmentRepository implements IAppointmentRepository {
         await this.httpClient.post<void>(BASE_URL, payload);
     }
 
-    async list(date: string, params: FetchParams): Promise<PaginatedResponse<Appointment>> {
-        const query = new URLSearchParams({
-            date,
-            pageNumber: String(params.pageNumber),
-            pageSize: String(params.pageSize),
-        });
-
-        if (params.search) {
-            query.set("search", params.search);
-        }
-
-        return this.httpClient.get<PaginatedResponse<Appointment>>(`${BASE_URL}?${query}`);
+    async listByRange(startDate: string, endDate: string): Promise<Appointment[]> {
+        const query = new URLSearchParams({ startDate, endDate });
+        const dtos = await this.httpClient.get<AppointmentDto[]>(`${BASE_URL}?${query}`);
+        return dtos.map(toAppointment);
     }
 
     async getById(appointmentId: string): Promise<Appointment> {
-        return this.httpClient.get<Appointment>(`${BASE_URL}/${appointmentId}`);
+        const dto = await this.httpClient.get<AppointmentDto>(`${BASE_URL}/${appointmentId}`);
+        return toAppointment(dto);
     }
 
     async getAvailableSlots(

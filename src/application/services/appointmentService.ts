@@ -5,7 +5,6 @@ import type {
     UpdateAppointmentPayload,
     AppointmentStatus,
 } from "@/domain/models/Appointment";
-import type { FetchParams, PaginatedResponse } from "@/domain/models/pagination";
 
 export const createAppointmentService = (appointmentRepository: IAppointmentRepository) => {
     return {
@@ -13,8 +12,8 @@ export const createAppointmentService = (appointmentRepository: IAppointmentRepo
             return await appointmentRepository.register(payload);
         },
 
-        async list(date: string, params: FetchParams): Promise<PaginatedResponse<Appointment>> {
-            return await appointmentRepository.list(date, params);
+        async listByRange(startDate: string, endDate: string): Promise<Appointment[]> {
+            return await appointmentRepository.listByRange(startDate, endDate);
         },
 
         async getById(appointmentId: string): Promise<Appointment> {

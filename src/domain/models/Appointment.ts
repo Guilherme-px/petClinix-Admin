@@ -1,4 +1,4 @@
-export type AppointmentStatus = "Scheduled" | "Confirmed" | "InProgress" | "Completed" | "Canceled";
+export type AppointmentStatus = "Scheduled" | "Confirmed" | "Completed" | "Canceled" | "NoShow";
 
 export interface Appointment {
     id: string;
@@ -6,7 +6,8 @@ export interface Appointment {
     petId: string;
     serviceId: string;
     veterinarianId: string;
-    scheduledDateUtc: string;
+    scheduledDate: string;
+    scheduledTime: string;
     status: AppointmentStatus;
     notes: string | null;
 }
@@ -16,13 +17,15 @@ export interface RegisterAppointmentPayload {
     petId: string;
     serviceId: string;
     veterinarianId: string;
-    scheduledDateUtc: string;
+    date: string;
+    time: string;
     notes: string | null;
 }
 
 export interface UpdateAppointmentPayload {
     veterinarianId: string;
     serviceId: string;
-    scheduledDateUtc: string;
+    date: string;
+    time: string;
     notes: string | null;
 }
