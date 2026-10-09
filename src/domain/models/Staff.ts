@@ -36,3 +36,6 @@ export const STAFF_ROLE_OPTIONS: { label: string; value: StaffRole }[] = [
     { label: "Veterinário", value: "Veterinarian" },
     { label: "Recepcionista", value: "Receptionist" },
 ];
+
+export const staffRoleLabel = (role: string): string =>
+    STAFF_ROLE_LABELS[role as StaffRole] ?? role;

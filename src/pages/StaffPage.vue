@@ -21,7 +21,7 @@
         <DataTable v-else :table="table" :columns="columns">
             <template #body-cell-role="{ row, props }">
                 <q-td :props="props" align="center">
-                    {{ STAFF_ROLE_LABELS[row.role as StaffRole] ?? row.role }}
+                    {{ staffRoleLabel(row.role) }}
                 </q-td>
             </template>
 
@@ -46,7 +46,7 @@
                             <div class="row items-center justify-between">
                                 <div class="text-subtitle1 text-weight-medium">{{ row.name }}</div>
                                 <div class="text-caption text-grey-7">
-                                    {{ STAFF_ROLE_LABELS[row.role as StaffRole] ?? row.role }}
+                                    {{ staffRoleLabel[row.role as StaffRole] ?? row.role }}
                                 </div>
                             </div>
                             <div class="text-caption text-grey-7 q-mt-xs">{{ row.email }}</div>
@@ -120,7 +120,7 @@ import type {
     RegisterStaffPayload,
     UpdateStaffPayload,
 } from "@/domain/models/Staff";
-import { STAFF_ROLE_LABELS } from "@/domain/models/Staff";
+import { staffRoleLabel } from "@/domain/models/Staff";
 import EmptyState from "@/components/common/EmptyState.vue";
 import emptyStaffImage from "@/assets/empty-staff.svg";
 import { formatPhone } from "@/utils/formatters";
