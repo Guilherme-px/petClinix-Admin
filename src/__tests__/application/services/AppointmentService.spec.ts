@@ -5,20 +5,17 @@ import type {
     RegisterAppointmentPayload,
     UpdateAppointmentPayload,
 } from "../../../domain/models/Appointment";
-import type { FetchParams, PaginatedResponse } from "../../../domain/models/pagination";
 import {
     createMockAppointment,
+    createMockAppointments,
     createRegisterAppointmentPayload,
     createUpdateAppointmentPayload,
-    createPaginatedAppointments,
 } from "../../../test/factories/appointmentFactory";
 
 describe("appointmentService", () => {
     const createRepoMock = () => {
         const repo = {
-            list: vi.fn<
-                (date: string, params: FetchParams) => Promise<PaginatedResponse<Appointment>>
-            >(),
+            listByRange: vi.fn<(startDate: string, endDate: string) => Promise<Appointment[]>>(),
             getById: vi.fn<(id: string) => Promise<Appointment>>(),
             register: vi.fn<(payload: RegisterAppointmentPayload) => Promise<void>>(),
             update: vi.fn<(id: string, payload: UpdateAppointmentPayload) => Promise<void>>(),
@@ -28,7 +25,7 @@ describe("appointmentService", () => {
         };
         return {
             repo,
-            listMock: repo.list,
+            listByRangeMock: repo.listByRange,
             getByIdMock: repo.getById,
             registerMock: repo.register,
             updateMock: repo.update,
@@ -37,16 +34,15 @@ describe("appointmentService", () => {
         };
     };
 
-    it("should call repository list with date and params", async () => {
-        const { repo, listMock } = createRepoMock();
-        const paginated = createPaginatedAppointments();
-        listMock.mockResolvedValue(paginated);
+    it("should call repository listByRange with start and end dates", async () => {
+        const { repo, listByRangeMock } = createRepoMock();
+        const appointments = createMockAppointments();
+        listByRangeMock.mockResolvedValue(appointments);
 
-        const params: FetchParams = { pageNumber: 1, pageSize: 10, search: "" };
-        const result = await createAppointmentService(repo).list("2026-10-10", params);
+        const result = await createAppointmentService(repo).listByRange("2026-10-01", "2026-10-31");
 
-        expect(listMock).toHaveBeenCalledWith("2026-10-10", params);
-        expect(result).toEqual(paginated);
+        expect(listByRangeMock).toHaveBeenCalledWith("2026-10-01", "2026-10-31");
+        expect(result).toEqual(appointments);
     });
 
     it("should call repository getById with appointment id", async () => {
@@ -101,15 +97,11 @@ describe("appointmentService", () => {
     });
 
     it("should propagate errors from repository", async () => {
-        const { repo, listMock } = createRepoMock();
-        listMock.mockRejectedValue(new Error("Network Error"));
+        const { repo, listByRangeMock } = createRepoMock();
+        listByRangeMock.mockRejectedValue(new Error("Network Error"));
 
         await expect(
-            createAppointmentService(repo).list("2026-10-10", {
-                pageNumber: 1,
-                pageSize: 10,
-                search: "",
-            }),
+            createAppointmentService(repo).listByRange("2026-10-01", "2026-10-31"),
         ).rejects.toThrow("Network Error");
     });
 });

@@ -3,10 +3,10 @@ import { AppointmentRepository } from "../../../infrastructure/repositories/Appo
 import { HttpClient } from "../../../infrastructure/http/HttpClient";
 import { createHttpClientMock, HttpClientMock } from "../../../test/helpers/mockHttpClient";
 import {
+    createMockAppointment,
+    createMockAppointmentDto,
     createRegisterAppointmentPayload,
     createUpdateAppointmentPayload,
-    createPaginatedAppointments,
-    createMockAppointment,
 } from "../../../test/factories/appointmentFactory";
 
 describe("AppointmentRepository", () => {
@@ -18,30 +18,33 @@ describe("AppointmentRepository", () => {
         appointmentRepository = new AppointmentRepository(httpClientMock as unknown as HttpClient);
     });
 
-    it("should call list endpoint with date and pagination params", async () => {
-        const paginated = createPaginatedAppointments();
-        httpClientMock.get.mockResolvedValue(paginated);
+    it("should call list endpoint with start and end date params", async () => {
+        const appointments = [createMockAppointment()];
+        httpClientMock.get.mockResolvedValue([createMockAppointmentDto()]);
 
-        const result = await appointmentRepository.list("2026-10-10", {
-            pageNumber: 1,
-            pageSize: 10,
-            search: "",
-        });
+        const result = await appointmentRepository.listByRange("2026-10-01", "2026-10-31");
 
         expect(httpClientMock.get).toHaveBeenCalledWith(
-            "/api/appointments?date=2026-10-10&pageNumber=1&pageSize=10",
+            "/api/appointments?startDate=2026-10-01&endDate=2026-10-31",
         );
-        expect(result).toEqual(paginated);
+        expect(result).toEqual(appointments);
     });
 
-    it("should call getById endpoint with appointment id", async () => {
-        const mockAppointment = createMockAppointment();
-        httpClientMock.get.mockResolvedValue(mockAppointment);
+    it("should normalize scheduled time when listing appointments", async () => {
+        httpClientMock.get.mockResolvedValue([createMockAppointmentDto()]);
+
+        const result = await appointmentRepository.listByRange("2026-10-01", "2026-10-31");
+
+        expect(result[0]!.scheduledTime).toBe("10:30");
+    });
+
+    it("should call getById endpoint and normalize scheduled time", async () => {
+        httpClientMock.get.mockResolvedValue(createMockAppointmentDto());
 
         const result = await appointmentRepository.getById("appt-1");
 
         expect(httpClientMock.get).toHaveBeenCalledWith("/api/appointments/appt-1");
-        expect(result).toEqual(mockAppointment);
+        expect(result).toEqual(createMockAppointment());
     });
 
     it("should call register endpoint with payload", async () => {
@@ -91,28 +94,8 @@ describe("AppointmentRepository", () => {
     it("should propagate errors from http client", async () => {
         httpClientMock.get.mockRejectedValue(new Error("Unauthorized"));
 
-        await expect(
-            appointmentRepository.list("2026-10-10", {
-                pageNumber: 1,
-                pageSize: 10,
-                search: "",
-            }),
-        ).rejects.toThrow("Unauthorized");
-    });
-
-    it("should append search param when provided", async () => {
-        const paginated = createPaginatedAppointments();
-        httpClientMock.get.mockResolvedValue(paginated);
-
-        const result = await appointmentRepository.list("2026-10-10", {
-            pageNumber: 1,
-            pageSize: 10,
-            search: "rex",
-        });
-
-        expect(httpClientMock.get).toHaveBeenCalledWith(
-            "/api/appointments?date=2026-10-10&pageNumber=1&pageSize=10&search=rex",
+        await expect(appointmentRepository.listByRange("2026-10-01", "2026-10-31")).rejects.toThrow(
+            "Unauthorized",
         );
-        expect(result).toEqual(paginated);
     });
 });

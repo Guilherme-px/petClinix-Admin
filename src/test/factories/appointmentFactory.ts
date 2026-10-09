@@ -1,61 +1,66 @@
-import type { PaginatedResponse } from "@/domain/models/pagination";
 import type {
     Appointment,
     RegisterAppointmentPayload,
     UpdateAppointmentPayload,
 } from "@/domain/models/Appointment";
+import type { AppointmentDto } from "@/infrastructure/dtos/AppointmentDto";
 
-export function createMockAppointment(overrides: Partial<Appointment> = {}): Appointment {
-    return {
-        id: "appt-1",
-        tutorId: "tutor-1",
-        petId: "pet-1",
-        serviceId: "service-1",
-        veterinarianId: "vet-1",
-        scheduledDateUtc: "2026-10-10T13:00:00Z",
-        status: "Scheduled",
-        notes: null,
-        ...overrides,
-    };
-}
+export const createMockAppointment = (overrides: Partial<Appointment> = {}): Appointment => ({
+    id: "appt-1",
+    tutorId: "tutor-1",
+    petId: "pet-1",
+    serviceId: "service-1",
+    veterinarianId: "vet-1",
+    scheduledDate: "2026-10-10",
+    scheduledTime: "10:30",
+    status: "Scheduled",
+    notes: "Observação de teste",
+    ...overrides,
+});
 
-export function createRegisterAppointmentPayload(
+export const createMockAppointments = (count = 2): Appointment[] =>
+    Array.from({ length: count }, (_, i) =>
+        createMockAppointment({
+            id: `appt-${i + 1}`,
+            scheduledTime: `${String(9 + i).padStart(2, "0")}:00`,
+        }),
+    );
+
+export const createRegisterAppointmentPayload = (
     overrides: Partial<RegisterAppointmentPayload> = {},
-): RegisterAppointmentPayload {
-    return {
-        tutorId: "tutor-1",
-        petId: "pet-1",
-        serviceId: "service-1",
-        veterinarianId: "vet-1",
-        scheduledDateUtc: "2026-10-10T13:00:00Z",
-        notes: null,
-        ...overrides,
-    };
-}
+): RegisterAppointmentPayload => ({
+    tutorId: "tutor-1",
+    petId: "pet-1",
+    serviceId: "service-1",
+    veterinarianId: "vet-1",
+    date: "2026-10-10",
+    time: "10:30",
+    notes: null,
+    ...overrides,
+});
 
-export function createUpdateAppointmentPayload(
+export const createUpdateAppointmentPayload = (
     overrides: Partial<UpdateAppointmentPayload> = {},
-): UpdateAppointmentPayload {
-    return {
-        veterinarianId: "vet-1",
-        serviceId: "service-1",
-        scheduledDateUtc: "2026-10-10T15:00:00Z",
-        notes: "Reagendado",
-        ...overrides,
-    };
-}
+): UpdateAppointmentPayload => ({
+    veterinarianId: "vet-1",
+    serviceId: "service-1",
+    date: "2026-10-10",
+    time: "14:00",
+    notes: null,
+    ...overrides,
+});
 
-export function createPaginatedAppointments(
-    overrides: Partial<PaginatedResponse<Appointment>> = {},
-): PaginatedResponse<Appointment> {
-    return {
-        items: [createMockAppointment()],
-        totalCount: 1,
-        pageNumber: 1,
-        pageSize: 10,
-        totalPages: 1,
-        hasPreviousPage: false,
-        hasNextPage: false,
-        ...overrides,
-    };
-}
+export const createMockAppointmentDto = (
+    overrides: Partial<AppointmentDto> = {},
+): AppointmentDto => ({
+    id: "appt-1",
+    tutorId: "tutor-1",
+    petId: "pet-1",
+    serviceId: "service-1",
+    veterinarianId: "vet-1",
+    scheduledDate: "2026-10-10",
+    scheduledTime: "10:30:00",
+    status: "Scheduled",
+    notes: "Observação de teste",
+    ...overrides,
+});
