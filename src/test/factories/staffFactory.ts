@@ -9,7 +9,8 @@ export function createMockStaff(overrides: Partial<StaffMember> = {}): StaffMemb
         documentNumber: "12345678900",
         phoneNumber: "11999998888",
         birthDate: "1990-05-15",
-        role: "Veterinário",
+        role: "Veterinarian",
+        isActive: true,
         ...overrides,
     };
 }
@@ -23,7 +24,7 @@ export function createRegisterStaffPayload(
         documentNumber: "98765432100",
         phoneNumber: "11988887777",
         birthDate: "1995-03-20",
-        role: "Auxiliar",
+        role: "Receptionist",
         ...overrides,
     };
 }
@@ -35,7 +36,7 @@ export function createUpdateStaffPayload(
         name: "Profissional Atualizado",
         phoneNumber: "11977776666",
         birthDate: "1995-03-20",
-        role: "Veterinário",
+        role: "Veterinarian",
         ...overrides,
     };
 }
