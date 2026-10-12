@@ -9,6 +9,7 @@ import App from "./App.vue";
 import router from "./router";
 
 import "@quasar/extras/material-icons/material-icons.css";
+import "@quasar/extras/fontawesome-v7/fontawesome-v7.css";
 import "quasar/src/css/index.sass";
 import "@/assets/css/main.css";
 
