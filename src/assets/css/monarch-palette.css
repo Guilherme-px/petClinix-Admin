@@ -1,0 +1,42 @@
+:root {
+    --fc-monarch-primary: var(--pet-primary);
+    --fc-monarch-primary-foreground: var(--pet-text-white);
+    --fc-monarch-primary-over: color-mix(in srgb, var(--pet-primary) 88%, white);
+    --fc-monarch-primary-down: color-mix(in srgb, var(--pet-primary) 85%, black);
+
+    --fc-monarch-secondary: color-mix(in srgb, var(--pet-primary) 15%, white);
+    --fc-monarch-secondary-foreground: color-mix(in srgb, var(--pet-primary) 60%, black);
+    --fc-monarch-secondary-over: color-mix(in srgb, var(--pet-primary) 22%, white);
+    --fc-monarch-secondary-down: color-mix(in srgb, var(--pet-primary) 30%, white);
+
+    --fc-monarch-tertiary: #26a69a;
+    --fc-monarch-tertiary-foreground: #ffffff;
+    --fc-monarch-tertiary-over: #2bcbc0;
+    --fc-monarch-tertiary-down: #009488;
+
+    --fc-monarch-event: var(--fc-monarch-primary);
+    --fc-monarch-event-contrast: var(--fc-monarch-primary-foreground);
+    --fc-monarch-highlight: color-mix(in srgb, var(--pet-primary) 12%, transparent);
+    --fc-monarch-now: rgb(186 26 26);
+
+    --fc-monarch-selected: var(--pet-primary);
+    --fc-monarch-selected-foreground: var(--pet-text-white);
+    --fc-monarch-selected-over: color-mix(in srgb, var(--pet-primary) 85%, white);
+    --fc-monarch-selected-down: color-mix(in srgb, var(--pet-primary) 80%, black);
+
+    --fc-monarch-popover: var(--fc-monarch-background);
+
+    --fc-monarch-background: #ffffff;
+    --fc-monarch-faint: #64748b1a;
+    --fc-monarch-muted: #64748b26;
+    --fc-monarch-strong: #64748b4d;
+    --fc-monarch-stronger: #64748b59;
+    --fc-monarch-strongest: #64748b66;
+
+    --fc-monarch-foreground: var(--pet-text-dark);
+    --fc-monarch-faint-foreground: #bebebe;
+    --fc-monarch-muted-foreground: #8d8d8d;
+
+    --fc-monarch-border: #dddee1;
+    --fc-monarch-strong-border: #c2c3c7;
+}
