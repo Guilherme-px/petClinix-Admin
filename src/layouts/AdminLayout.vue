@@ -130,10 +130,10 @@ const displayName = computed(() => {
     if (!fullName) return "Minha Conta";
 
     const parts = fullName.trim().split(/\s+/);
-    if (parts.length === 1) return parts[0];
-
-    const firstName = parts[0] ?? "";
+    const firstName = parts[0]!;
     const secondName = parts[1] ?? "";
+
+    if (parts.length === 1) return firstName;
 
     if (firstName.length <= 4 && secondName) {
         return `${firstName} ${secondName}`;
