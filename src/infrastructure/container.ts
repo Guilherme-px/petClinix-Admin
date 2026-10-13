@@ -11,6 +11,8 @@ import { createPetService } from "@/application/services/petService";
 import { PetRepository } from "./repositories/PetRepository";
 import { AppointmentRepository } from "./repositories/AppointmentRepository";
 import { createAppointmentService } from "@/application/services/appointmentService";
+import { BillingRepository } from "./repositories/BillingRepository";
+import { createBillingService } from "@/application/services/billingService";
 
 /* v8 ignore next 1: Fallback para ambiente de dev */
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5180";
@@ -34,6 +36,8 @@ class Container {
         const petService = createPetService(petRepository);
         const appointmentRepository = new AppointmentRepository(this.httpClient);
         const appointmentService = createAppointmentService(appointmentRepository);
+        const billingRepository = new BillingRepository(this.httpClient);
+        const billingService = createBillingService(billingRepository);
 
         this.services.set("IAuthRepository", authRepository);
         this.services.set("AuthService", authService);
@@ -47,6 +51,8 @@ class Container {
         this.services.set("PetService", petService);
         this.services.set("IAppointmentRepository", appointmentRepository);
         this.services.set("AppointmentService", appointmentService);
+        this.services.set("IBillingRepository", billingRepository);
+        this.services.set("BillingService", billingService);
     }
 
     /* v8 ignore next 4: Singleton pattern, instance creation is covered by module load */

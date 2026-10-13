@@ -1,7 +1,16 @@
 <template>
-    <div v-if="authStore.isAuthenticating" class="loading-screen column flex-center bg-white">
+    <div
+        v-if="authStore.isAuthenticating || isOpeningBilling"
+        class="loading-screen column flex-center bg-white"
+    >
         <q-spinner-dots color="primary" size="50px" />
-        <p class="text-grey-7 q-mt-md">Validando sessão...</p>
+        <p class="text-grey-7 q-mt-md">
+            {{
+                authStore.isAuthenticating
+                    ? "Validando sessão..."
+                    : "Abrindo portal de assinatura..."
+            }}
+        </p>
     </div>
 
     <q-layout v-else view="hHh LpR fFf">
@@ -22,7 +31,13 @@
                             </q-item-section>
                         </q-item>
 
-                        <q-item clickable v-close-popup @click="router.push('/billing')">
+                        <q-item
+                            v-if="authStore.userRole === 'Admin'"
+                            clickable
+                            v-close-popup
+                            :disable="isOpeningBilling"
+                            @click="openBillingPortal"
+                        >
                             <q-item-section avatar>
                                 <q-icon name="credit_card" />
                             </q-item-section>
@@ -87,10 +102,19 @@ import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import AppLogo from "@/components/AppLogo.vue";
 import { useAuthStore } from "@/stores/auth";
+import type { BillingService } from "@/application/services/billingService";
+import { container } from "@/infrastructure/container";
+import { getErrorMessage } from "@/infrastructure/http/errorHandler";
+import { useQuasar } from "quasar";
 
 const leftDrawerOpen = ref(false);
+const isOpeningBilling = ref(false);
+
+const $q = useQuasar();
 const authStore = useAuthStore();
 const router = useRouter();
+
+const billingService = container.resolve<BillingService>("BillingService");
 
 const menuItems = [
     { label: "Agendamentos", icon: "event", route: "/appointments" },
@@ -125,6 +149,23 @@ const toggleLeftDrawer = () => {
 const handleLogout = () => {
     authStore.logout();
     router.push("/login");
+};
+
+const openBillingPortal = async () => {
+    if (isOpeningBilling.value) return;
+
+    isOpeningBilling.value = true;
+    try {
+        const { portalUrl } = await billingService.createPortalSession(window.location.href);
+        window.location.href = portalUrl;
+    } catch (error) {
+        $q.notify({
+            type: "negative",
+            message: getErrorMessage(error, "Erro ao abrir o portal de assinatura."),
+        });
+    } finally {
+        isOpeningBilling.value = false;
+    }
 };
 </script>
 
