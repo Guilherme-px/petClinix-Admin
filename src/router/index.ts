@@ -50,6 +50,7 @@ const router = createRouter({
                     path: "staff",
                     name: "staff",
                     component: () => import("@/pages/StaffPage.vue"),
+                    meta: { requiresAdmin: true },
                 },
                 {
                     path: "tutors",
@@ -86,6 +87,10 @@ router.beforeEach(async (to) => {
                 return { name: "login" };
             }
         }
+    }
+
+    if (to.meta.requiresAdmin && authStore.userRole !== "Admin") {
+        return { name: "appointments" };
     }
 
     if (to.meta.guestOnly && authStore.isAuthenticated) {

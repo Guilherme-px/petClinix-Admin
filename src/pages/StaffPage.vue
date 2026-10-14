@@ -114,11 +114,7 @@ import { useDataTable } from "@/composables/useDataTable";
 import { container } from "@/infrastructure/container";
 import { getErrorMessage } from "@/infrastructure/http/errorHandler";
 import type { StaffService } from "@/application/services/staffService";
-import type {
-    StaffMember,
-    RegisterStaffPayload,
-    UpdateStaffPayload,
-} from "@/domain/models/Staff";
+import type { StaffMember, RegisterStaffPayload, UpdateStaffPayload } from "@/domain/models/Staff";
 import { staffRoleLabel } from "@/domain/models/Staff";
 import EmptyState from "@/components/common/EmptyState.vue";
 import emptyStaffImage from "@/assets/empty-staff.svg";

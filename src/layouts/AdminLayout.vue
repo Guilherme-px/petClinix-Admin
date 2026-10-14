@@ -116,14 +116,25 @@ const router = useRouter();
 
 const billingService = container.resolve<BillingService>("BillingService");
 
-const menuItems = [
-    { label: "Agendamentos", icon: "event", route: "/appointments" },
-    { label: "Clientes", icon: "group", route: "/tutors" },
-    { label: "Pets", icon: "pets", route: "/pets" },
-    { label: "Serviços", icon: "medical_services", route: "/services" },
-    { label: "Equipe", icon: "badge", route: "/staff" },
-    { label: "Meu perfil", icon: "person", route: "/profile" },
-];
+interface MenuItem {
+    label: string;
+    icon: string;
+    route: string;
+    adminOnly?: boolean;
+}
+
+const menuItems = computed<MenuItem[]>(() => {
+    const items: MenuItem[] = [
+        { label: "Agendamentos", icon: "event", route: "/appointments" },
+        { label: "Clientes", icon: "group", route: "/tutors" },
+        { label: "Pets", icon: "pets", route: "/pets" },
+        { label: "Serviços", icon: "medical_services", route: "/services" },
+        { label: "Equipe", icon: "badge", route: "/staff", adminOnly: true },
+        { label: "Meu perfil", icon: "person", route: "/profile" },
+    ];
+
+    return items.filter((item) => !item.adminOnly || authStore.userRole === "Admin");
+});
 
 const displayName = computed(() => {
     const fullName = authStore.user?.name;
