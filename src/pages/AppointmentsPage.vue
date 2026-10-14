@@ -130,12 +130,6 @@ const calendarOptions = computed<CalendarOptions>(() => ({
         center: "title",
         right: "prev,today,next",
     },
-    buttonText: {
-        today: "Hoje",
-        month: "Mês",
-        week: "Semana",
-        day: "Dia",
-    },
     weekends: true,
     selectable: true,
     eventDisplay: "block",
