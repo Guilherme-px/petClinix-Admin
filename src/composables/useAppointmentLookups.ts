@@ -20,15 +20,13 @@ export const createAppointmentLookups = (
 
     const load = async () => {
         try {
-            const [staff, tutorPage, servicePage] = await Promise.all([
-                services.staffService.list({ pageNumber: 1, pageSize: 100, search: "" }),
+            const [vets, tutorPage, servicePage] = await Promise.all([
+                services.staffService.getVeterinarians(),
                 services.tutorService.list({ pageNumber: 1, pageSize: 100, search: "" }),
                 services.catalogService.list({ pageNumber: 1, pageSize: 100, search: "" }),
             ]);
 
-            veterinarians.value = staff.items
-                .filter((s) => s.role === "Veterinarian")
-                .map((s) => ({ id: s.id, name: s.name }));
+            veterinarians.value = vets;
             tutors.value = tutorPage.items.map((t) => ({
                 id: t.id,
                 name: t.name,

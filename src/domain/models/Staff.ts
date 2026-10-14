@@ -27,6 +27,11 @@ export interface UpdateStaffPayload {
     role: StaffRole;
 }
 
+export interface VeterinarianOption {
+    id: string;
+    name: string;
+}
+
 export const STAFF_ROLE_LABELS: Record<StaffRole, string> = {
     Veterinarian: "Veterinário",
     Receptionist: "Recepcionista",

@@ -1,5 +1,10 @@
 import type { IStaffRepository } from "@/domain/repositories/IStaffRepository";
-import type { StaffMember, RegisterStaffPayload, UpdateStaffPayload } from "@/domain/models/Staff";
+import type {
+    StaffMember,
+    RegisterStaffPayload,
+    UpdateStaffPayload,
+    VeterinarianOption,
+} from "@/domain/models/Staff";
 import type { FetchParams, PaginatedResponse } from "@/domain/models/pagination";
 
 export const createStaffService = (staffRepository: IStaffRepository) => {
@@ -14,6 +19,10 @@ export const createStaffService = (staffRepository: IStaffRepository) => {
 
         async list(params: FetchParams): Promise<PaginatedResponse<StaffMember>> {
             return await staffRepository.list(params);
+        },
+
+        async getVeterinarians(): Promise<VeterinarianOption[]> {
+            return await staffRepository.getVeterinarians();
         },
 
         async update(staffId: string, payload: UpdateStaffPayload): Promise<void> {
