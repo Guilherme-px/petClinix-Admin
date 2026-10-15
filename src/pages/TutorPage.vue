@@ -1,101 +1,114 @@
 <template>
-    <ListPageLayout title="Clientes">
-        <template #actions>
-            <q-btn
-                unelevated
-                no-wrap
-                label="Novo Tutor"
-                color="primary"
-                icon="add"
-                @click="openCreate"
+    <q-page padding>
+        <ListPageLayout title="Clientes">
+            <template #actions>
+                <q-btn
+                    unelevated
+                    no-wrap
+                    label="Novo Tutor"
+                    color="primary"
+                    icon="add"
+                    @click="openCreate"
+                />
+            </template>
+
+            <EmptyState
+                v-if="table.showEmptyState.value"
+                :image="emptyTutorsImage"
+                title="Nenhum tutor cadastrado"
+                description="Cadastre o primeiro tutor para começar a atender seus clientes."
             />
-        </template>
 
-        <EmptyState
-            v-if="table.showEmptyState.value"
-            :image="emptyTutorsImage"
-            title="Nenhum tutor cadastrado"
-            description="Cadastre o primeiro tutor para começar a atender seus clientes."
-        />
+            <DataTable v-else :table="table" :columns="columns">
+                <template #body-cell-actions="{ row, props }">
+                    <q-td :props="props" align="center" class="q-gutter-x-xs">
+                        <q-btn
+                            flat
+                            dense
+                            round
+                            icon="edit"
+                            color="primary"
+                            @click="openEdit(row)"
+                        />
+                        <q-btn
+                            flat
+                            dense
+                            round
+                            icon="delete"
+                            color="negative"
+                            @click="openDelete(row)"
+                        />
+                    </q-td>
+                </template>
 
-        <DataTable v-else :table="table" :columns="columns">
-            <template #body-cell-actions="{ row, props }">
-                <q-td :props="props" align="center" class="q-gutter-x-xs">
-                    <q-btn flat dense round icon="edit" color="primary" @click="openEdit(row)" />
-                    <q-btn
-                        flat
-                        dense
-                        round
-                        icon="delete"
-                        color="negative"
-                        @click="openDelete(row)"
-                    />
-                </q-td>
-            </template>
+                <template #item="{ row }">
+                    <div class="q-pa-xs col-12">
+                        <q-card flat bordered>
+                            <q-card-section class="q-pb-sm">
+                                <div class="row items-center justify-between">
+                                    <div class="text-subtitle1 text-weight-medium">
+                                        {{ row.name }}
+                                    </div>
+                                    <div class="text-caption text-grey-7">
+                                        {{ formatCpf(row.cpf) }}
+                                    </div>
+                                </div>
+                                <div v-if="row.email" class="text-caption text-grey-7 q-mt-xs">
+                                    {{ row.email }}
+                                </div>
+                                <div class="text-caption text-grey-7">
+                                    {{ row.city }}/{{ row.state }}
+                                </div>
+                            </q-card-section>
+                            <q-card-section class="row items-center justify-between q-py-sm">
+                                <div class="text-caption text-grey-8">
+                                    {{ formatPhone(row.phoneNumber) }}
+                                </div>
+                                <div class="q-gutter-x-xs">
+                                    <q-btn
+                                        flat
+                                        dense
+                                        round
+                                        size="sm"
+                                        icon="edit"
+                                        color="primary"
+                                        @click="openEdit(row)"
+                                    />
+                                    <q-btn
+                                        flat
+                                        dense
+                                        round
+                                        size="sm"
+                                        icon="delete"
+                                        color="negative"
+                                        @click="openDelete(row)"
+                                    />
+                                </div>
+                            </q-card-section>
+                        </q-card>
+                    </div>
+                </template>
+            </DataTable>
 
-            <template #item="{ row }">
-                <div class="q-pa-xs col-12">
-                    <q-card flat bordered>
-                        <q-card-section class="q-pb-sm">
-                            <div class="row items-center justify-between">
-                                <div class="text-subtitle1 text-weight-medium">{{ row.name }}</div>
-                                <div class="text-caption text-grey-7">{{ formatCpf(row.cpf) }}</div>
-                            </div>
-                            <div v-if="row.email" class="text-caption text-grey-7 q-mt-xs">
-                                {{ row.email }}
-                            </div>
-                            <div class="text-caption text-grey-7">
-                                {{ row.city }}/{{ row.state }}
-                            </div>
-                        </q-card-section>
-                        <q-card-section class="row items-center justify-between q-py-sm">
-                            <div class="text-caption text-grey-8">
-                                {{ formatPhone(row.phoneNumber) }}
-                            </div>
-                            <div class="q-gutter-x-xs">
-                                <q-btn
-                                    flat
-                                    dense
-                                    round
-                                    size="sm"
-                                    icon="edit"
-                                    color="primary"
-                                    @click="openEdit(row)"
-                                />
-                                <q-btn
-                                    flat
-                                    dense
-                                    round
-                                    size="sm"
-                                    icon="delete"
-                                    color="negative"
-                                    @click="openDelete(row)"
-                                />
-                            </div>
-                        </q-card-section>
-                    </q-card>
-                </div>
-            </template>
-        </DataTable>
+            <ConfirmDialog
+                v-model="isDeleteOpen"
+                title="Excluir tutor"
+                :message="deleteMessage"
+                icon="delete"
+                confirm-label="Excluir"
+                confirm-color="negative"
+                :loading="isDeleting"
+                @confirm="onDeleteConfirm"
+            />
 
-        <ConfirmDialog
-            v-model="isDeleteOpen"
-            title="Excluir tutor"
-            :message="deleteMessage"
-            icon="delete"
-            confirm-label="Excluir"
-            confirm-color="negative"
-            :loading="isDeleting"
-            @confirm="onDeleteConfirm"
-        />
-
-        <TutorFormDialog
-            v-model="isFormOpen"
-            :tutor="selectedTutor"
-            :is-loading="isSubmitting"
-            @submit="onFormSubmit"
-        />
-    </ListPageLayout>
+            <TutorFormDialog
+                v-model="isFormOpen"
+                :tutor="selectedTutor"
+                :is-loading="isSubmitting"
+                @submit="onFormSubmit"
+            />
+        </ListPageLayout>
+    </q-page>
 </template>
 
 <script lang="ts" setup>

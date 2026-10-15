@@ -1,126 +1,137 @@
 <template>
-    <ListPageLayout title="Serviços">
-        <template #actions>
-            <q-btn
-                unelevated
-                no-wrap
-                label="Novo Serviço"
-                color="primary"
-                icon="add"
-                @click="openCreate"
+    <q-page padding>
+        <ListPageLayout title="Serviços">
+            <template #actions>
+                <q-btn
+                    unelevated
+                    no-wrap
+                    label="Novo Serviço"
+                    color="primary"
+                    icon="add"
+                    @click="openCreate"
+                />
+            </template>
+
+            <EmptyState
+                v-if="table.showEmptyState.value"
+                :image="emptyServicesImage"
+                title="Nenhum serviço cadastrado"
+                description="Cadastre os serviços que a clínica oferece para começar a agendar."
             />
-        </template>
 
-        <EmptyState
-            v-if="table.showEmptyState.value"
-            :image="emptyServicesImage"
-            title="Nenhum serviço cadastrado"
-            description="Cadastre os serviços que a clínica oferece para começar a agendar."
-        />
+            <DataTable v-else :table="table" :columns="columns">
+                <template #body-cell-price="{ row, props }">
+                    <q-td :props="props" align="center">
+                        {{ formatPrice(row.price) }}
+                    </q-td>
+                </template>
 
-        <DataTable v-else :table="table" :columns="columns">
-            <template #body-cell-price="{ row, props }">
-                <q-td :props="props" align="center">
-                    {{ formatPrice(row.price) }}
-                </q-td>
-            </template>
+                <template #body-cell-description="{ row, props }">
+                    <q-td :props="props" align="left">
+                        <div class="description-clamp">
+                            {{ row.description || "—" }}
+                        </div>
+                        <q-tooltip v-if="row.description">
+                            {{ row.description }}
+                        </q-tooltip>
+                    </q-td>
+                </template>
 
-            <template #body-cell-description="{ row, props }">
-                <q-td :props="props" align="left">
-                    <div class="description-clamp">
-                        {{ row.description || "—" }}
-                    </div>
-                    <q-tooltip v-if="row.description">
-                        {{ row.description }}
-                    </q-tooltip>
-                </q-td>
-            </template>
+                <template #body-cell-actions="{ row, props }">
+                    <q-td :props="props" align="center" class="q-gutter-x-xs">
+                        <q-btn
+                            flat
+                            dense
+                            round
+                            icon="edit"
+                            color="primary"
+                            @click="openEdit(row)"
+                        />
+                        <q-btn
+                            flat
+                            dense
+                            round
+                            icon="delete"
+                            color="negative"
+                            @click="openDelete(row)"
+                        />
+                    </q-td>
+                </template>
 
-            <template #body-cell-actions="{ row, props }">
-                <q-td :props="props" align="center" class="q-gutter-x-xs">
-                    <q-btn flat dense round icon="edit" color="primary" @click="openEdit(row)" />
-                    <q-btn
-                        flat
-                        dense
-                        round
-                        icon="delete"
-                        color="negative"
-                        @click="openDelete(row)"
-                    />
-                </q-td>
-            </template>
-
-            <template #item="{ row }">
-                <div class="q-pa-xs col-12">
-                    <q-card flat bordered>
-                        <q-card-section class="q-pb-sm">
-                            <div class="row items-center justify-between">
-                                <div class="text-subtitle1 text-weight-medium">{{ row.name }}</div>
-                                <div class="text-subtitle1 text-weight-medium">
-                                    {{ formatPrice(row.price) }}
+                <template #item="{ row }">
+                    <div class="q-pa-xs col-12">
+                        <q-card flat bordered>
+                            <q-card-section class="q-pb-sm">
+                                <div class="row items-center justify-between">
+                                    <div class="text-subtitle1 text-weight-medium">
+                                        {{ row.name }}
+                                    </div>
+                                    <div class="text-subtitle1 text-weight-medium">
+                                        {{ formatPrice(row.price) }}
+                                    </div>
                                 </div>
-                            </div>
-                            <div
-                                v-if="row.description"
-                                class="description-clamp text-caption text-grey-7 q-mt-xs"
-                            >
-                                {{ row.description }}
-                            </div>
-                        </q-card-section>
-                        <q-separator />
-                        <q-card-section class="row items-center justify-between q-py-sm">
-                            <div class="text-caption text-grey-8">
-                                {{ formatDuration(row.durationInMinutes) }} ·
-                                {{
-                                    row.requiresVeterinarian
-                                        ? "Requer veterinário"
-                                        : "Sem veterinário"
-                                }}
-                            </div>
-                            <div class="q-gutter-x-xs">
-                                <q-btn
-                                    flat
-                                    dense
-                                    round
-                                    size="sm"
-                                    icon="edit"
-                                    color="primary"
-                                    @click="openEdit(row)"
-                                />
-                                <q-btn
-                                    flat
-                                    dense
-                                    round
-                                    size="sm"
-                                    icon="delete"
-                                    color="negative"
-                                    @click="openDelete(row)"
-                                />
-                            </div>
-                        </q-card-section>
-                    </q-card>
-                </div>
-            </template>
-        </DataTable>
+                                <div
+                                    v-if="row.description"
+                                    class="description-clamp text-caption text-grey-7 q-mt-xs"
+                                >
+                                    {{ row.description }}
+                                </div>
+                            </q-card-section>
+                            <q-separator />
+                            <q-card-section class="row items-center justify-between q-py-sm">
+                                <div class="text-caption text-grey-8">
+                                    {{ formatDuration(row.durationInMinutes) }} ·
+                                    {{
+                                        row.requiresVeterinarian
+                                            ? "Requer veterinário"
+                                            : "Sem veterinário"
+                                    }}
+                                </div>
+                                <div class="q-gutter-x-xs">
+                                    <q-btn
+                                        flat
+                                        dense
+                                        round
+                                        size="sm"
+                                        icon="edit"
+                                        color="primary"
+                                        @click="openEdit(row)"
+                                    />
+                                    <q-btn
+                                        flat
+                                        dense
+                                        round
+                                        size="sm"
+                                        icon="delete"
+                                        color="negative"
+                                        @click="openDelete(row)"
+                                    />
+                                </div>
+                            </q-card-section>
+                        </q-card>
+                    </div>
+                </template>
+            </DataTable>
 
-        <ConfirmDialog
-            v-model="isDeleteOpen"
-            title="Excluir serviço"
-            :message="deleteMessage"
-            icon="delete"
-            confirm-label="Excluir"
-            confirm-color="negative"
-            :loading="isDeleting"
-            @confirm="onDeleteConfirm"
-        />
+            <ConfirmDialog
+                v-model="isDeleteOpen"
+                title="Excluir serviço"
+                :message="deleteMessage"
+                icon="delete"
+                confirm-label="Excluir"
+                confirm-color="negative"
+                :loading="isDeleting"
+                @confirm="onDeleteConfirm"
+            />
 
-        <ServiceFormDialog
-            v-model="isFormOpen"
-            :service="selectedService"
-            :is-loading="isSubmitting"
-            @submit="onFormSubmit"
-        />
-    </ListPageLayout>
+            <ServiceFormDialog
+                v-model="isFormOpen"
+                :service="selectedService"
+                :is-loading="isSubmitting"
+                @submit="onFormSubmit"
+            />
+        </ListPageLayout>
+    </q-page>
 </template>
 
 <script lang="ts" setup>
