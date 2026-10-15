@@ -13,6 +13,43 @@
             </template>
 
             <div class="calendar-shell">
+                <div class="calendar-header">
+                    <div class="calendar-header__views">
+                        <q-btn-toggle
+                            v-model="currentView"
+                            unelevated
+                            no-caps
+                            dense
+                            class="view-toggle"
+                            toggle-color="primary"
+                            :options="viewOptions"
+                            @update:model-value="changeView"
+                        />
+                    </div>
+
+                    <div class="calendar-header__title">{{ viewTitle }}</div>
+
+                    <div class="calendar-header__nav">
+                        <q-btn
+                            flat
+                            round
+                            dense
+                            icon="chevron_left"
+                            class="nav-btn"
+                            @click="goPrev"
+                        />
+                        <q-btn flat dense no-caps label="Hoje" class="today-btn" @click="goToday" />
+                        <q-btn
+                            flat
+                            round
+                            dense
+                            icon="chevron_right"
+                            class="nav-btn"
+                            @click="goNext"
+                        />
+                    </div>
+                </div>
+
                 <div class="relative-position">
                     <FullCalendar ref="calendarRef" :options="calendarOptions" />
 
@@ -53,7 +90,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 import { useQuasar } from "quasar";
 import FullCalendar, { type CalendarOptions } from "@fullcalendar/vue3";
 import themePlugin from "@fullcalendar/vue3/themes/monarch";
@@ -83,6 +120,8 @@ import { createAppointmentLookups } from "@/composables/useAppointmentLookups";
 import AppointmentStatusLegend from "@/components/appointments/AppointmentStatusLegend.vue";
 
 const $q = useQuasar();
+
+const isMobile = computed(() => $q.screen.lt.sm);
 
 const notifyError = (message: string) => $q.notify({ type: "negative", message });
 
@@ -121,25 +160,70 @@ const isStatusUpdating = ref(false);
 const selectedAppointment = ref<Appointment | null>(null);
 const calendarRef = ref<InstanceType<typeof FullCalendar> | null>(null);
 
+const currentView = ref(isMobile.value ? "timeGridWeek" : "dayGridMonth");
+const viewTitle = ref("");
+
+const viewOptions = computed(() =>
+    isMobile.value
+        ? [
+              { label: "Semana", value: "timeGridWeek" },
+              { label: "Dia", value: "timeGridDay" },
+          ]
+        : [
+              { label: "Mês", value: "dayGridMonth" },
+              { label: "Semana", value: "timeGridWeek" },
+              { label: "Dia", value: "timeGridDay" },
+          ],
+);
+
+const getApi = () => calendarRef.value?.getApi();
+
+const goPrev = () => getApi()?.prev();
+const goNext = () => getApi()?.next();
+const goToday = () => getApi()?.today();
+const changeView = (view: string | number | null) => {
+    if (typeof view === "string") getApi()?.changeView(view);
+};
+
+const renderEventContent = (arg: { timeText: string; event: { title: string } }) => {
+    const wrapper = document.createElement("div");
+    wrapper.style.cssText =
+        "padding:2px 5px;overflow:hidden;line-height:1.25;text-align:left;";
+
+    if (arg.timeText) {
+        const time = document.createElement("div");
+        time.style.cssText = "font-size:10px;font-weight:700;white-space:nowrap;";
+        time.textContent = arg.timeText;
+        wrapper.appendChild(time);
+    }
+
+    const title = document.createElement("div");
+    title.style.cssText =
+        "font-size:10.5px;white-space:normal;word-break:break-word;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;";
+    title.textContent = arg.event.title;
+    wrapper.appendChild(title);
+
+    return { domNodes: [wrapper] };
+};
+
 const calendarOptions = computed<CalendarOptions>(() => ({
     plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin, themePlugin],
-    initialView: "dayGridMonth",
+    initialView: currentView.value,
     locale: ptBrLocale,
-    headerToolbar: {
-        left: "dayGridMonth,timeGridWeek,timeGridDay",
-        center: "title",
-        right: "prev,today,next",
-    },
+    headerToolbar: false,
     weekends: true,
     selectable: true,
     eventDisplay: "block",
     events: calendarEvents.value,
     datesSet: onDatesSet,
     eventClick: onEventClick,
+    eventContent: renderEventContent,
     allDaySlot: false,
     slotMinTime: "08:00:00",
     slotMaxTime: "18:00:00",
-    height: 750,
+    slotEventOverlap: false,
+    eventMinHeight: 34,
+    height: isMobile.value ? "auto" : 750,
     fixedWeekCount: true,
     showNonCurrentDates: true,
     eventTimeFormat: {
@@ -152,7 +236,17 @@ const calendarOptions = computed<CalendarOptions>(() => ({
     },
 }));
 
-const onDatesSet = (dateInfo: { start: Date; end: Date }) => {
+watch(isMobile, (mobile) => {
+    changeView(mobile ? "timeGridWeek" : "dayGridMonth");
+});
+
+const onDatesSet = (dateInfo: {
+    start: Date;
+    end: Date;
+    view: { title: string; type: string };
+}) => {
+    viewTitle.value = dateInfo.view.title;
+    currentView.value = dateInfo.view.type;
     void loadRange(dateInfo.start, dateInfo.end);
 };
 
@@ -176,7 +270,7 @@ const openEditFromDetail = () => {
 };
 
 const refreshCalendar = () => {
-    const api = calendarRef.value?.getApi();
+    const api = getApi();
     if (api) void loadRange(api.view.activeStart, api.view.activeEnd);
 };
 
@@ -239,5 +333,88 @@ onMounted(async () => {
 .calendar-shell :deep([class^="fc-monarch-lqx"]),
 .calendar-shell :deep([class*=" fc-monarch-MAH"]) {
     border-radius: 0 !important;
+}
+
+.calendar-header {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border-bottom: 1px solid #eeeeee;
+    background-color: #ffffff;
+}
+
+.calendar-header__views {
+    justify-self: start;
+}
+
+.calendar-header__nav {
+    justify-self: end;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.calendar-header__title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #16213e;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.view-toggle {
+    background-color: #eef1f4;
+    border-radius: 999px;
+    padding: 3px;
+}
+
+.view-toggle :deep(.q-btn) {
+    border-radius: 999px;
+    padding: 5px 16px;
+    min-height: 0;
+    font-weight: 500;
+    color: #4b5563;
+}
+
+.today-btn {
+    border: 1px solid #d5d9e0;
+    border-radius: 999px;
+    padding: 5px 18px;
+    min-height: 0;
+    font-weight: 500;
+    color: #4b5563;
+}
+
+.nav-btn {
+    color: #4b5563;
+}
+
+@media (max-width: 599px) {
+    .calendar-header {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        gap: 10px;
+        padding: 12px;
+    }
+
+    .calendar-header__title {
+        order: -1;
+        max-width: 100%;
+        font-size: 1.2rem;
+        white-space: normal;
+    }
+
+    .calendar-header__views,
+    .calendar-header__nav {
+        justify-self: center;
+    }
+
+    .view-toggle :deep(.q-btn) {
+        padding: 4px 14px;
+    }
 }
 </style>
