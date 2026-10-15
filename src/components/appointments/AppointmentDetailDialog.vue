@@ -50,15 +50,22 @@
                 </div>
             </q-card-section>
 
-            <q-card-actions align="between" class="q-px-md q-pb-md">
-                <q-btn flat label="Fechar" color="grey-7" v-close-popup />
-                <div class="q-gutter-x-md">
+            <q-card-actions align="between" class="dialog-actions q-px-md q-pb-md">
+                <q-btn
+                    flat
+                    label="Fechar"
+                    color="grey-7"
+                    v-close-popup
+                    class="dialog-actions__close"
+                />
+                <div class="dialog-actions__group">
                     <q-btn
                         outline
                         no-wrap
                         label="Cancelar Agendamento"
                         color="amber-8"
                         icon="event_busy"
+                        class="dialog-actions__cancel"
                         :disable="isLoading || !canChangeStatus"
                         @click="$emit('cancel')"
                     />
@@ -68,6 +75,7 @@
                         label="Editar"
                         color="primary"
                         icon="edit_calendar"
+                        class="dialog-actions__edit"
                         :disable="isLoading || !canChangeStatus"
                         @click="$emit('edit')"
                     />
@@ -213,5 +221,40 @@ const formattedDate = computed(() => {
     border-radius: 50%;
     display: inline-block;
     margin: 0 4px;
+}
+
+.dialog-actions {
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.dialog-actions__group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+@media (max-width: 599px) {
+    .dialog-actions,
+    .dialog-actions__group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .dialog-actions__edit {
+        order: 1;
+    }
+
+    .dialog-actions__cancel {
+        order: 2;
+    }
+
+    .dialog-actions__close {
+        order: 3;
+    }
+
+    .dialog-actions :deep(.q-btn) {
+        width: 100%;
+    }
 }
 </style>
