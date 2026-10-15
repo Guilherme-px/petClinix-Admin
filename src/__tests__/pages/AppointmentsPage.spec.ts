@@ -119,26 +119,7 @@ describe("AppointmentsPage", () => {
         });
 
         appointmentServiceMock.listByRange.mockResolvedValue([appointment]);
-        staffServiceMock.list.mockResolvedValue({
-            items: [
-                {
-                    id: "vet-1",
-                    name: "Dr. João",
-                    role: "Veterinarian",
-                    isActive: true,
-                    email: "vet@petclinix.com",
-                    documentNumber: "1",
-                    phoneNumber: "1",
-                    birthDate: "1990-01-01",
-                },
-            ],
-            totalCount: 1,
-            pageNumber: 1,
-            pageSize: 100,
-            totalPages: 1,
-            hasPreviousPage: false,
-            hasNextPage: false,
-        });
+        staffServiceMock.getVeterinarians.mockResolvedValue([{ id: "vet-1", name: "Dr. João" }]);
         tutorServiceMock.list.mockResolvedValue({
             items: [
                 {
@@ -197,7 +178,7 @@ describe("AppointmentsPage", () => {
         await flushPromises();
 
         const expectedParams = { pageNumber: 1, pageSize: 100, search: "" };
-        expect(staffServiceMock.list).toHaveBeenCalledWith(expectedParams);
+        expect(staffServiceMock.getVeterinarians).toHaveBeenCalled();
         expect(tutorServiceMock.list).toHaveBeenCalledWith(expectedParams);
         expect(catalogServiceMock.list).toHaveBeenCalledWith(expectedParams);
     });
@@ -211,7 +192,7 @@ describe("AppointmentsPage", () => {
     });
 
     it("should notify error when lookups fail on mount", async () => {
-        staffServiceMock.list.mockRejectedValue(new Error("fail"));
+        staffServiceMock.getVeterinarians.mockRejectedValue(new Error("fail"));
 
         mountPage();
         await flushPromises();
@@ -274,14 +255,14 @@ describe("AppointmentsPage", () => {
     it("should open create dialog with null appointment and refresh lookups", async () => {
         const wrapper = mountPage();
         await flushPromises();
-        staffServiceMock.list.mockClear();
+        staffServiceMock.getVeterinarians.mockClear();
 
         await findButtonByIcon(wrapper, "add")!.trigger("click");
 
         const form = wrapper.findComponent(AppointmentFormDialog);
         expect(form.props("modelValue")).toBe(true);
         expect(form.props("appointment")).toBeNull();
-        expect(staffServiceMock.list).toHaveBeenCalled();
+        expect(staffServiceMock.getVeterinarians).toHaveBeenCalled();
     });
 
     it("should open form populated when edit is emitted from detail", async () => {

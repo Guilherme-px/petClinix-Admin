@@ -5,11 +5,9 @@ import {
     createTutorServiceMock,
     createCatalogServiceMock,
 } from "../../test/mocks/services";
-import { createMockStaff, createPaginatedStaff } from "../../test/factories/staffFactory";
 import { createMockTutor, createPaginatedTutors } from "../../test/factories/tutorFactory";
-import type { VeterinaryService } from "@/domain/models/VeterinaryService";
-import type { PaginatedResponse } from "@/domain/models/pagination";
-import type { FetchParams } from "@/domain/models/pagination";
+import type { VeterinaryService } from "../../domain/models/VeterinaryService";
+import type { PaginatedResponse, FetchParams } from "../../domain/models/pagination";
 
 const createCatalogPage = (): PaginatedResponse<VeterinaryService> => ({
     items: [
@@ -43,15 +41,10 @@ const setup = () => {
     const tutorService = createTutorServiceMock();
     const catalogService = createCatalogServiceMock();
 
-    staffService.list.mockResolvedValue(
-        createPaginatedStaff({
-            items: [
-                createMockStaff({ id: "vet-1", name: "Dr. João", role: "Veterinarian" }),
-                createMockStaff({ id: "rec-1", name: "Maria", role: "Receptionist" }),
-            ],
-            totalCount: 2,
-        }),
-    );
+    staffService.getVeterinarians.mockResolvedValue([
+        { id: "vet-1", name: "Dr. João" },
+        { id: "vet-2", name: "Dra. Maria" },
+    ]);
     tutorService.list.mockResolvedValue(
         createPaginatedTutors({
             items: [createMockTutor({ id: "tutor-1", name: "Guilherme" })],
@@ -78,23 +71,28 @@ describe("createAppointmentLookups", () => {
         expect(lookups.services.value).toEqual([]);
     });
 
-    it("should call all three services with default fetch params", async () => {
+    it("should call staff service via dedicated endpoint and others with fetch params", async () => {
         const { staffService, tutorService, catalogService, lookups } = setup();
 
         await lookups.load();
 
+        expect(staffService.getVeterinarians).toHaveBeenCalled();
+        expect(staffService.list).not.toHaveBeenCalled();
+
         const expectedParams: FetchParams = { pageNumber: 1, pageSize: 100, search: "" };
-        expect(staffService.list).toHaveBeenCalledWith(expectedParams);
         expect(tutorService.list).toHaveBeenCalledWith(expectedParams);
         expect(catalogService.list).toHaveBeenCalledWith(expectedParams);
     });
 
-    it("should keep only veterinarians with id and name", async () => {
+    it("should load veterinarians from the dedicated endpoint", async () => {
         const { lookups } = setup();
 
         await lookups.load();
 
-        expect(lookups.veterinarians.value).toEqual([{ id: "vet-1", name: "Dr. João" }]);
+        expect(lookups.veterinarians.value).toEqual([
+            { id: "vet-1", name: "Dr. João" },
+            { id: "vet-2", name: "Dra. Maria" },
+        ]);
     });
 
     it("should map tutors with phone from phoneNumber", async () => {
@@ -118,9 +116,9 @@ describe("createAppointmentLookups", () => {
         ]);
     });
 
-    it("should notify error and keep lookups empty when staff fetch fails", async () => {
+    it("should notify error and keep lookups empty when veterinarians fetch fails", async () => {
         const { staffService, onError, lookups } = setup();
-        staffService.list.mockRejectedValue(new Error("Network Error"));
+        staffService.getVeterinarians.mockRejectedValue(new Error("Network Error"));
 
         await lookups.load();
 
