@@ -5,6 +5,7 @@ import type {
     StaffMember,
     RegisterStaffPayload,
     UpdateStaffPayload,
+    VeterinarianOption,
 } from "../../../domain/models/Staff";
 import {
     createMockStaff,
@@ -18,6 +19,7 @@ describe("staffService", () => {
         const repo = {
             list: vi.fn<(params: FetchParams) => Promise<PaginatedResponse<StaffMember>>>(),
             getById: vi.fn<(id: string) => Promise<StaffMember>>(),
+            getVeterinarians: vi.fn<() => Promise<VeterinarianOption[]>>(),
             register: vi.fn<(payload: RegisterStaffPayload) => Promise<void>>(),
             update: vi.fn<(id: string, payload: UpdateStaffPayload) => Promise<void>>(),
             remove: vi.fn<(id: string) => Promise<void>>(),
@@ -25,6 +27,7 @@ describe("staffService", () => {
         return {
             repo,
             listMock: repo.list,
+            vetsMock: repo.getVeterinarians,
             getByIdMock: repo.getById,
             registerMock: repo.register,
             updateMock: repo.update,
@@ -88,5 +91,26 @@ describe("staffService", () => {
         await expect(
             createStaffService(repo).list({ pageNumber: 1, pageSize: 10, search: "" }),
         ).rejects.toThrow("Network Error");
+    });
+
+    it("should call repository getVeterinarians and return the list", async () => {
+        const { repo, vetsMock } = createRepoMock();
+        const vets = [
+            { id: "vet-1", name: "Dr. João" },
+            { id: "vet-2", name: "Dra. Maria" },
+        ];
+        vetsMock.mockResolvedValue(vets);
+
+        const result = await createStaffService(repo).getVeterinarians();
+
+        expect(vetsMock).toHaveBeenCalledWith();
+        expect(result).toEqual(vets);
+    });
+
+    it("should propagate errors from getVeterinarians", async () => {
+        const { repo, vetsMock } = createRepoMock();
+        vetsMock.mockRejectedValue(new Error("Network Error"));
+
+        await expect(createStaffService(repo).getVeterinarians()).rejects.toThrow("Network Error");
     });
 });

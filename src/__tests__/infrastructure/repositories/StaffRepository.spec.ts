@@ -24,7 +24,9 @@ describe("StaffRepository", () => {
 
         const result = await staffRepository.list({ pageNumber: 1, pageSize: 10, search: "" });
 
-        expect(httpClientMock.get).toHaveBeenCalledWith("/api/clinics/me/staff?pageNumber=1&pageSize=10");
+        expect(httpClientMock.get).toHaveBeenCalledWith(
+            "/api/clinics/me/staff?pageNumber=1&pageSize=10",
+        );
         expect(result).toEqual(paginated);
     });
 
@@ -77,7 +79,18 @@ describe("StaffRepository", () => {
     it("should propagate errors from http client", async () => {
         httpClientMock.get.mockRejectedValue(new Error("Unauthorized"));
 
-        await expect(staffRepository.list({ pageNumber: 1, pageSize: 10, search: "" }))
-            .rejects.toThrow("Unauthorized");
+        await expect(
+            staffRepository.list({ pageNumber: 1, pageSize: 10, search: "" }),
+        ).rejects.toThrow("Unauthorized");
+    });
+
+    it("should call veterinarians endpoint without pagination", async () => {
+        const vets = [{ id: "vet-1", name: "Dr. João" }];
+        httpClientMock.get.mockResolvedValue(vets);
+
+        const result = await staffRepository.getVeterinarians();
+
+        expect(httpClientMock.get).toHaveBeenCalledWith("/api/clinics/me/veterinarians");
+        expect(result).toEqual(vets);
     });
 });

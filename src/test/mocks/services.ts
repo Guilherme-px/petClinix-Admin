@@ -1,5 +1,10 @@
 import { vi } from "vitest";
-import type { StaffMember, RegisterStaffPayload, UpdateStaffPayload } from "@/domain/models/Staff";
+import type {
+    StaffMember,
+    RegisterStaffPayload,
+    UpdateStaffPayload,
+    VeterinarianOption,
+} from "@/domain/models/Staff";
 import type { Tutor, RegisterTutorPayload, UpdateTutorPayload } from "@/domain/models/Tutor";
 import type { ServicePayload, VeterinaryService } from "@/domain/models/VeterinaryService";
 import type { Pet, PetPayload } from "@/domain/models/Pet";
@@ -12,6 +17,7 @@ import type { FetchParams, PaginatedResponse } from "@/domain/models/pagination"
 
 export const createStaffServiceMock = () => ({
     list: vi.fn<(params: FetchParams) => Promise<PaginatedResponse<StaffMember>>>(),
+    getVeterinarians: vi.fn<() => Promise<VeterinarianOption[]>>(),
     getById: vi.fn<(id: string) => Promise<StaffMember>>(),
     register: vi.fn<(payload: RegisterStaffPayload) => Promise<void>>(),
     update: vi.fn<(id: string, payload: UpdateStaffPayload) => Promise<void>>(),
