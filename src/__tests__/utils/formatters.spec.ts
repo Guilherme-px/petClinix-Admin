@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { formatPhone, formatCpf, formatDuration } from "../../utils/formatters";
+import { formatPhone, formatCpf, formatDuration, formatDate } from "../../utils/formatters";
 
 describe("formatPhone", () => {
     it("should format mobile numbers with 11 digits", () => {
@@ -56,5 +56,23 @@ describe("formatDuration", () => {
         expect(formatDuration(90)).toBe("1h 30min");
         expect(formatDuration(61)).toBe("1h 1min");
         expect(formatDuration(1500)).toBe("25h");
+    });
+});
+
+describe("formatDate", () => {
+    it("should return empty string for empty input", () => {
+        expect(formatDate("")).toBe("");
+    });
+
+    it("should return raw value when malformed", () => {
+        expect(formatDate("data-invalida")).toBe("data-invalida");
+    });
+
+    it("should handle ISO datetime with time part", () => {
+        expect(formatDate("2020-05-10T14:30:00")).toBe("10/05/2020");
+    });
+
+    it("should format yyyy-MM-dd to dd/MM/yyyy", () => {
+        expect(formatDate("2020-05-10")).toBe("10/05/2020");
     });
 });
