@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { mount, flushPromises } from "@vue/test-utils";
 import { defineComponent, h, nextTick } from "vue";
 import { QBtn } from "quasar";
-import { createTestingPinia, type TestingPinia } from "@pinia/testing";
 import AdminLayout from "../../layouts/AdminLayout.vue";
 import type { BillingService } from "../../application/services/billingService";
 import { createMockUser } from "../../test/factories/authFactory";
@@ -74,10 +73,8 @@ const QDrawerStub = defineComponent({
 });
 
 const mountLayout = () => {
-    const pinia: TestingPinia = createTestingPinia();
     const wrapper = mount(AdminLayout, {
         global: {
-            plugins: [pinia],
             stubs: {
                 QLayout: passthroughStub("QLayout"),
                 QHeader: passthroughStub("QHeader"),
@@ -103,6 +100,9 @@ const originalLocation = window.location;
 describe("AdminLayout", () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        const store = useAuthStore();
+        store.user = null;
+        store.isAuthenticating = false;
         vi.mocked(container.resolve).mockReturnValue(
             createBillingServiceMock("ok") as BillingService,
         );
