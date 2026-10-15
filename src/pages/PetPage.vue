@@ -1,30 +1,35 @@
 <template>
     <ListPageLayout title="Pets">
         <template #actions>
-            <q-select
-                outlined
-                dense
-                v-model="selectedTutorId"
-                :options="tutorOptions"
-                label="Selecione o Tutor"
-                emit-value
-                map-options
-                style="min-width: 170px"
-                @update:model-value="onTutorChange"
-            />
-            <div class="relative-position">
+            <div class="pets-toolbar">
+                <q-select
+                    v-model="selectedTutorId"
+                    :options="tutorOptions"
+                    label="Selecione o tutor"
+                    emit-value
+                    map-options
+                    clearable
+                    outlined
+                    dense
+                    behavior="menu"
+                    class="pets-toolbar__select"
+                    @update:model-value="onTutorChange"
+                />
+
                 <q-btn
                     unelevated
-                    no-wrap
-                    label="Novo Pet"
+                    no-caps
                     color="primary"
                     icon="add"
+                    label="Novo Pet"
+                    class="pets-toolbar__btn"
                     :disable="!selectedTutorId"
                     @click="openCreate"
-                />
-                <q-tooltip v-if="!selectedTutorId" class="text-caption">
-                    Selecione um tutor!
-                </q-tooltip>
+                >
+                    <q-tooltip v-if="!selectedTutorId" class="text-caption">
+                        Selecione um tutor primeiro
+                    </q-tooltip>
+                </q-btn>
             </div>
         </template>
 
@@ -88,7 +93,9 @@
                             <div class="text-caption text-grey-8">
                                 {{ PET_SEX_LABELS[row.sex as PetSex] }} ·
                                 {{ formatWeight(row.weight) }}
-                                <template v-if="row.birthDate"> · {{ row.birthDate }}</template>
+                                <template v-if="row.birthDate">
+                                    · {{ formatDate(row.birthDate) }}</template
+                                >
                             </div>
                             <div class="q-gutter-x-xs">
                                 <q-btn
@@ -154,6 +161,7 @@ import type { Pet, PetPayload } from "@/domain/models/Pet";
 import type { Species, PetSex } from "@/domain/models/Pet";
 import { SPECIES_LABELS, PET_SEX_LABELS } from "@/domain/models/Pet";
 import emptyPetsImage from "@/assets/pets.svg";
+import { formatDate } from "@/utils/formatters";
 
 const $q = useQuasar();
 const petService = container.resolve<PetService>("PetService");
@@ -277,3 +285,42 @@ const onFormSubmit = async (payload: PetPayload) => {
     }
 };
 </script>
+
+<style scoped>
+.pets-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.pets-toolbar__select {
+    width: 260px;
+    max-width: 100%;
+}
+
+.pets-toolbar__select :deep(.q-field__control) {
+    background: #fff;
+}
+
+.pets-toolbar__btn {
+    flex: 0 0 auto;
+    align-self: center;
+    height: 40px;
+    padding: 0 20px;
+    font-weight: 600;
+}
+
+@media (max-width: 599px) {
+    .pets-toolbar {
+        width: 100%;
+    }
+
+    .pets-toolbar__select,
+    .pets-toolbar__btn {
+        flex: 1 1 100%;
+        width: 100%;
+    }
+}
+</style>

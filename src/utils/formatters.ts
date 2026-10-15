@@ -20,3 +20,11 @@ export const formatDuration = (minutes: number) => {
     if (remainingMinutes === 0) return `${hours}h`;
     return `${hours}h ${remainingMinutes}min`;
 };
+
+export const formatDate = (date: string) => {
+    if (!date) return "";
+    const [datePart] = date.split("T");
+    const [year, month, day] = datePart!.split("-");
+    if (!year || !month || !day) return date;
+    return `${day}/${month}/${year}`;
+};
