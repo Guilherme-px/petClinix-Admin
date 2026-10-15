@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { reactive, nextTick } from "vue";
 import { mount, flushPromises } from "@vue/test-utils";
 import { QBtn } from "quasar";
 import AppointmentsPage from "../../pages/AppointmentsPage.vue";
@@ -17,8 +18,9 @@ import {
 } from "../../test/mocks/services";
 import { createMockAppointment } from "../../test/factories/appointmentFactory";
 import { createMockPet, createPaginatedPets } from "../../test/factories/petFactory";
-import { screenState } from "../../test/helpers/mockQuasar";
 import { QDialogStub, QTooltipStub, QPageStub } from "../../test/helpers/stubs";
+
+const mockScreen = reactive({ xs: false, lt: { sm: false } });
 
 vi.mock("quasar", async (importOriginal) => {
     const actual = await importOriginal<typeof import("quasar")>();
@@ -26,7 +28,7 @@ vi.mock("quasar", async (importOriginal) => {
         ...actual,
         useQuasar: () => ({
             notify: notifyMock,
-            screen: screenState,
+            screen: mockScreen,
         }),
     };
 });
@@ -36,6 +38,15 @@ const notifyMock = vi.fn<(opts: Record<string, unknown>) => void>();
 vi.mock("@/infrastructure/container", () => ({
     container: {
         resolve: vi.fn<(key: string) => unknown>(),
+    },
+}));
+
+const { calendarApiMocks } = vi.hoisted(() => ({
+    calendarApiMocks: {
+        prev: vi.fn<() => void>(),
+        next: vi.fn<() => void>(),
+        today: vi.fn<() => void>(),
+        changeView: vi.fn<(view: string) => void>(),
     },
 }));
 
@@ -51,7 +62,10 @@ vi.mock("@fullcalendar/vue3", async () => {
                     view: {
                         activeStart: new Date(2026, 9, 1),
                         activeEnd: new Date(2026, 10, 1),
+                        title: "outubro de 2026",
+                        type: "dayGridMonth",
                     },
+                    ...calendarApiMocks,
                 }),
             });
             return () => h("div", { "data-test": "fullcalendar-stub" });
@@ -87,9 +101,13 @@ const findCalendar = (wrapper: ReturnType<typeof mountPage>) =>
 
 const triggerDatesSet = async (wrapper: ReturnType<typeof mountPage>, start: Date, end: Date) => {
     const options = findCalendar(wrapper).props("options") as {
-        datesSet: (info: { start: Date; end: Date }) => void;
+        datesSet: (info: { start: Date; end: Date; view: { title: string; type: string } }) => void;
     };
-    options.datesSet({ start, end });
+    options.datesSet({
+        start,
+        end,
+        view: { title: "outubro de 2026", type: "dayGridMonth" },
+    });
     await flushPromises();
 };
 
@@ -107,7 +125,7 @@ const findButtonByIcon = (wrapper: ReturnType<typeof mountPage>, icon: string) =
 describe("AppointmentsPage", () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        screenState.lt.sm = false;
+        mockScreen.lt.sm = false;
 
         vi.mocked(container.resolve).mockImplementation((key: string) => {
             if (key === "AppointmentService") return appointmentServiceMock;
@@ -467,5 +485,114 @@ describe("AppointmentsPage", () => {
 
         expect(appointmentServiceMock.updateStatus).not.toHaveBeenCalled();
         expect(notifyMock).not.toHaveBeenCalled();
+    });
+
+    it("should render custom header with title from datesSet", async () => {
+        const wrapper = mountPage();
+        await flushPromises();
+
+        await triggerDatesSet(wrapper, new Date(2026, 9, 1), new Date(2026, 10, 1));
+
+        expect(wrapper.find(".calendar-header__title").text()).toBe("outubro de 2026");
+    });
+
+    it("should show only week and day views on mobile", async () => {
+        mockScreen.lt.sm = true;
+        const wrapper = mountPage();
+        await flushPromises();
+
+        const labels = wrapper.findAllComponents(QBtn).map((b) => b.props("label"));
+        expect(labels).toContain("Semana");
+        expect(labels).toContain("Dia");
+        expect(labels).not.toContain("Mês");
+    });
+
+    it("should show all three views on desktop", async () => {
+        const wrapper = mountPage();
+        await flushPromises();
+
+        const labels = wrapper.findAllComponents(QBtn).map((b) => b.props("label"));
+        expect(labels).toContain("Mês");
+        expect(labels).toContain("Semana");
+        expect(labels).toContain("Dia");
+    });
+
+    it("should navigate previous when nav button is clicked", async () => {
+        const wrapper = mountPage();
+        await flushPromises();
+
+        await findButtonByIcon(wrapper, "chevron_left")!.trigger("click");
+        await flushPromises();
+
+        expect(calendarApiMocks.prev).toHaveBeenCalled();
+    });
+
+    it("should sync current view when the toggle emits update:modelValue", async () => {
+        const wrapper = mountPage();
+        await flushPromises();
+
+        const toggle = wrapper.findComponent({ name: "QBtnToggle" });
+        await toggle.vm.$emit("update:modelValue", "timeGridDay");
+        await flushPromises();
+
+        expect(calendarApiMocks.changeView).toHaveBeenCalledWith("timeGridDay");
+    });
+
+    it("should ignore null view changes", async () => {
+        const wrapper = mountPage();
+        await flushPromises();
+
+        const toggle = wrapper.findComponent({ name: "QBtnToggle" });
+        await toggle.vm.$emit("update:modelValue", null);
+        await flushPromises();
+
+        expect(calendarApiMocks.changeView).not.toHaveBeenCalled();
+    });
+
+    it("should render event content with time and clamped title", () => {
+        const wrapper = mountPage();
+        const options = findCalendar(wrapper).props("options") as {
+            eventContent: (arg: { timeText: string; event: { title: string } }) => {
+                domNodes: HTMLElement[];
+            };
+        };
+
+        const result = options.eventContent({
+            timeText: "10:30",
+            event: { title: "- Dr. João" },
+        });
+        const wrapperEl = result.domNodes[0]!;
+
+        expect(wrapperEl.children).toHaveLength(2);
+        expect(wrapperEl.children[0]!.textContent).toBe("10:30");
+        expect(wrapperEl.children[0]!.style.fontWeight).toBe("700");
+        expect(wrapperEl.children[1]!.textContent).toBe("- Dr. João");
+        expect(wrapperEl.children[1]!.style.cssText).toContain("-webkit-line-clamp: 3");
+    });
+
+    it("should render event content without time when absent", () => {
+        const wrapper = mountPage();
+        const options = findCalendar(wrapper).props("options") as {
+            eventContent: (arg: { timeText: string; event: { title: string } }) => {
+                domNodes: HTMLElement[];
+            };
+        };
+
+        const result = options.eventContent({ timeText: "", event: { title: "- Dr. João" } });
+        const wrapperEl = result.domNodes[0]!;
+
+        expect(wrapperEl.children).toHaveLength(1);
+        expect(wrapperEl.children[0]!.textContent).toBe("- Dr. João");
+    });
+
+    it("should switch to week view when screen becomes mobile", async () => {
+        mountPage();
+        await flushPromises();
+
+        mockScreen.lt.sm = true;
+        await flushPromises();
+        await nextTick();
+
+        expect(calendarApiMocks.changeView).toHaveBeenCalledWith("timeGridWeek");
     });
 });
