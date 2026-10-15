@@ -55,8 +55,8 @@ defineExpose({ props, emit });
 
 <style scoped>
 .confirm-dialog {
-    min-width: 60px;
-    max-width: 30vw;
+    width: 100%;
+    max-width: min(90vw, 420px);
     border-radius: 12px;
     overflow: hidden;
 }
