@@ -24,6 +24,7 @@
                 </q-input>
 
                 <q-input
+                    ref="passwordInputRef"
                     outlined
                     v-model="password"
                     label="Nova Senha"
@@ -83,15 +84,16 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue";
-import { useRouter } from "vue-router";
+import { onMounted, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import AppLogo from "@/components/AppLogo.vue";
 import { useAuthStore } from "@/stores/auth";
-import { useQuasar } from "quasar";
+import { useQuasar, type QInput } from "quasar";
 import { useValidations } from "@/composables/useValidations";
 
 const $q = useQuasar();
 const authStore = useAuthStore();
+const route = useRoute();
 const router = useRouter();
 const { required, passwordRules, confirmPasswordRules } = useValidations();
 
@@ -100,6 +102,17 @@ const isPwd = ref(true);
 const token = ref("");
 const password = ref("");
 const confirmPassword = ref("");
+const passwordInputRef = ref<QInput | null>(null);
+
+onMounted(() => {
+    const tokenFromUrl = route.query.token;
+    const value = Array.isArray(tokenFromUrl) ? tokenFromUrl[0] : tokenFromUrl;
+
+    if (value) {
+        token.value = value;
+        passwordInputRef.value?.focus();
+    }
+});
 
 const onSubmit = async () => {
     isLoading.value = true;
