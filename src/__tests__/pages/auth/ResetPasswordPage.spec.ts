@@ -16,6 +16,7 @@ vi.mock("quasar", async (importOriginal) => {
 
 vi.mock("vue-router", () => ({
     useRouter: vi.fn<() => unknown>(),
+    useRoute: vi.fn<() => unknown>(),
 }));
 
 vi.mock("@/composables/useValidations", () => ({
@@ -35,15 +36,17 @@ vi.mock("@/components/AppLogo.vue", () => ({
 
 import { useAuthStore } from "../../../stores/auth";
 import { useQuasar } from "quasar";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 
 describe("ResetPasswordPage", () => {
     const mockSetPassword = vi.fn<(token: string, password: string) => Promise<void>>();
     const mockNotify = vi.fn<(opts: unknown) => void>();
     const mockPush = vi.fn<(to: string) => Promise<unknown>>();
+    const mockRoute = { query: {} as Record<string, unknown> };
 
     beforeEach(() => {
         vi.clearAllMocks();
+        mockRoute.query = {};
 
         vi.mocked(useAuthStore).mockReturnValue({
             setPassword: mockSetPassword,
@@ -56,6 +59,8 @@ describe("ResetPasswordPage", () => {
         vi.mocked(useRouter).mockReturnValue({
             push: mockPush,
         } as unknown as ReturnType<typeof useRouter>);
+
+        vi.mocked(useRoute).mockReturnValue(mockRoute as unknown as ReturnType<typeof useRoute>);
     });
 
     it("should render token, password and confirm password inputs", () => {
@@ -63,6 +68,15 @@ describe("ResetPasswordPage", () => {
         expect(wrapper.find('[data-test="token-input"]').exists()).toBe(true);
         expect(wrapper.find('[data-test="password-input"]').exists()).toBe(true);
         expect(wrapper.find('[data-test="confirm-password-input"]').exists()).toBe(true);
+    });
+
+    it("should prefill token from url query on mount", async () => {
+        mockRoute.query = { token: "url-token" };
+        const wrapper = mount(ResetPasswordPage);
+        await flushPromises();
+
+        const tokenInput = wrapper.find<HTMLInputElement>('[data-test="token-input"]');
+        expect(tokenInput.element.value).toBe("url-token");
     });
 
     it("should navigate to login on 'Voltar para login' click", async () => {
@@ -125,5 +139,14 @@ describe("ResetPasswordPage", () => {
 
         await toggleIcon.trigger("click");
         expect(passwordInput.props("type")).toBe("password");
+    });
+
+    it("should prefill first token when url query has repeated token param", async () => {
+        mockRoute.query = { token: ["first-token", "second-token"] };
+        const wrapper = mount(ResetPasswordPage);
+        await flushPromises();
+
+        const tokenInput = wrapper.find<HTMLInputElement>('[data-test="token-input"]');
+        expect(tokenInput.element.value).toBe("first-token");
     });
 });
