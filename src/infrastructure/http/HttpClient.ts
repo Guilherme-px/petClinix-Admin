@@ -1,5 +1,8 @@
 import axios, { type AxiosInstance, type InternalAxiosRequestConfig, AxiosError } from "axios";
 import { errorHandler } from "./errorHandler";
+import { resolveLoadingStore } from "@/stores/loading";
+
+const REQUEST_TIMEOUT_MS = 120000;
 
 export class HttpClient {
     private instance: AxiosInstance;
@@ -8,7 +11,7 @@ export class HttpClient {
     private logoutFn?: () => void;
 
     constructor(baseURL: string) {
-        this.instance = axios.create({ baseURL });
+        this.instance = axios.create({ baseURL, timeout: REQUEST_TIMEOUT_MS });
 
         this.instance.interceptors.request.use((config) => {
             const token = localStorage.getItem("token");
@@ -66,11 +69,15 @@ export class HttpClient {
         url: string,
         data?: TRequest,
     ): Promise<T> {
+        const loadingStore = resolveLoadingStore();
+        loadingStore?.begin();
         try {
             const response = await this.instance.request<T>({ method, url, data });
             return response.data;
         } catch (error: unknown) {
             throw errorHandler(error);
+        } finally {
+            loadingStore?.end();
         }
     }
 
