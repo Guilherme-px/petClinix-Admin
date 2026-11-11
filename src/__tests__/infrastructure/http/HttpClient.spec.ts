@@ -46,10 +46,6 @@ describe("HttpClient", () => {
     const getResponseErrorInterceptor = () =>
         mockInstance.interceptors.response.use.mock.calls[0][1];
 
-    it("should be created with baseURL", () => {
-        expect(axios.create).toHaveBeenCalledWith({ baseURL: "http://test.com" });
-    });
-
     it("should add auth token to headers if present in localStorage", () => {
         localStorage.setItem("token", "fake-token");
         const config = { headers: {} };
@@ -250,5 +246,12 @@ describe("HttpClient", () => {
         await expect(
             client.patch("/api/appointments/appt-1/status", { newStatus: "Canceled" }),
         ).rejects.toThrow("Not Found");
+    });
+
+    it("should be created with baseURL", () => {
+        expect(axios.create).toHaveBeenCalledWith({
+            baseURL: "http://test.com",
+            timeout: 120000,
+        });
     });
 });
