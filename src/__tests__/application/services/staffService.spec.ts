@@ -7,11 +7,13 @@ import type {
     UpdateStaffPayload,
     VeterinarianOption,
 } from "../../../domain/models/Staff";
+import type { StaffLimit } from "../../../domain/models/StaffLimit";
 import {
     createMockStaff,
     createRegisterStaffPayload,
     createUpdateStaffPayload,
     createPaginatedStaff,
+    createStaffLimit,
 } from "../../../test/factories/staffFactory";
 
 describe("staffService", () => {
@@ -20,6 +22,7 @@ describe("staffService", () => {
             list: vi.fn<(params: FetchParams) => Promise<PaginatedResponse<StaffMember>>>(),
             getById: vi.fn<(id: string) => Promise<StaffMember>>(),
             getVeterinarians: vi.fn<() => Promise<VeterinarianOption[]>>(),
+            getStaffLimit: vi.fn<() => Promise<StaffLimit>>(),
             register: vi.fn<(payload: RegisterStaffPayload) => Promise<void>>(),
             update: vi.fn<(id: string, payload: UpdateStaffPayload) => Promise<void>>(),
             remove: vi.fn<(id: string) => Promise<void>>(),
@@ -28,6 +31,7 @@ describe("staffService", () => {
             repo,
             listMock: repo.list,
             vetsMock: repo.getVeterinarians,
+            getStaffLimitMock: repo.getStaffLimit,
             getByIdMock: repo.getById,
             registerMock: repo.register,
             updateMock: repo.update,
@@ -112,5 +116,23 @@ describe("staffService", () => {
         vetsMock.mockRejectedValue(new Error("Network Error"));
 
         await expect(createStaffService(repo).getVeterinarians()).rejects.toThrow("Network Error");
+    });
+
+    it("should call repository getStaffLimit and return the limit", async () => {
+        const { repo, getStaffLimitMock } = createRepoMock();
+        const staffLimit = createStaffLimit();
+        getStaffLimitMock.mockResolvedValue(staffLimit);
+
+        const result = await createStaffService(repo).getStaffLimit();
+
+        expect(getStaffLimitMock).toHaveBeenCalledWith();
+        expect(result).toEqual(staffLimit);
+    });
+
+    it("should propagate errors from getStaffLimit", async () => {
+        const { repo, getStaffLimitMock } = createRepoMock();
+        getStaffLimitMock.mockRejectedValue(new Error("Network Error"));
+
+        await expect(createStaffService(repo).getStaffLimit()).rejects.toThrow("Network Error");
     });
 });

@@ -1,5 +1,6 @@
 import type { PaginatedResponse } from "@/domain/models/pagination";
 import type { StaffMember, RegisterStaffPayload, UpdateStaffPayload } from "@/domain/models/Staff";
+import type { StaffLimit } from "@/domain/models/StaffLimit";
 
 export function createMockStaff(overrides: Partial<StaffMember> = {}): StaffMember {
     return {
@@ -52,6 +53,14 @@ export function createPaginatedStaff(
         totalPages: 1,
         hasPreviousPage: false,
         hasNextPage: false,
+        ...overrides,
+    };
+}
+
+export function createStaffLimit(overrides: Partial<StaffLimit> = {}): StaffLimit {
+    return {
+        used: 2,
+        limit: 5,
         ...overrides,
     };
 }

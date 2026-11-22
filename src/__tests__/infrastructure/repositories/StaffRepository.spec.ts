@@ -7,6 +7,7 @@ import {
     createUpdateStaffPayload,
     createPaginatedStaff,
     createMockStaff,
+    createStaffLimit,
 } from "../../../test/factories/staffFactory";
 
 describe("StaffRepository", () => {
@@ -92,5 +93,25 @@ describe("StaffRepository", () => {
 
         expect(httpClientMock.get).toHaveBeenCalledWith("/api/clinics/me/veterinarians");
         expect(result).toEqual(vets);
+    });
+
+    it("should call staff limit endpoint", async () => {
+        const staffLimit = createStaffLimit();
+        httpClientMock.get.mockResolvedValue(staffLimit);
+
+        const result = await staffRepository.getStaffLimit();
+
+        expect(httpClientMock.get).toHaveBeenCalledWith("/api/clinics/me/staff-limit");
+        expect(result).toEqual(staffLimit);
+    });
+
+    it("should call staff limit endpoint without maximum when plan is unlimited", async () => {
+        const staffLimit = createStaffLimit({ limit: null });
+        httpClientMock.get.mockResolvedValue(staffLimit);
+
+        const result = await staffRepository.getStaffLimit();
+
+        expect(httpClientMock.get).toHaveBeenCalledWith("/api/clinics/me/staff-limit");
+        expect(result.limit).toBeNull();
     });
 });
