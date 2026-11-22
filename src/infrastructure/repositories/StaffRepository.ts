@@ -7,6 +7,7 @@ import type {
 } from "@/domain/models/Staff";
 import type { FetchParams, PaginatedResponse } from "@/domain/models/pagination";
 import { HttpClient } from "@/infrastructure/http/HttpClient";
+import type { StaffLimit } from "@/domain/models/StaffLimit";
 
 const BASE_URL = "/api/clinics/me";
 const STAFF_URL = `${BASE_URL}/staff`;
@@ -41,6 +42,10 @@ export class StaffRepository implements IStaffRepository {
 
     async getVeterinarians(): Promise<VeterinarianOption[]> {
         return this.httpClient.get<VeterinarianOption[]>(`${BASE_URL}/veterinarians`);
+    }
+
+    async getStaffLimit(): Promise<StaffLimit> {
+        return this.httpClient.get<StaffLimit>(`${BASE_URL}/staff-limit`);
     }
 
     async update(staffId: string, payload: UpdateStaffPayload): Promise<void> {

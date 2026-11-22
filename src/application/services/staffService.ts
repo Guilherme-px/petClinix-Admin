@@ -6,6 +6,7 @@ import type {
     VeterinarianOption,
 } from "@/domain/models/Staff";
 import type { FetchParams, PaginatedResponse } from "@/domain/models/pagination";
+import type { StaffLimit } from "@/domain/models/StaffLimit";
 
 export const createStaffService = (staffRepository: IStaffRepository) => {
     return {
@@ -23,6 +24,10 @@ export const createStaffService = (staffRepository: IStaffRepository) => {
 
         async getVeterinarians(): Promise<VeterinarianOption[]> {
             return await staffRepository.getVeterinarians();
+        },
+
+        async getStaffLimit(): Promise<StaffLimit> {
+            return await staffRepository.getStaffLimit()
         },
 
         async update(staffId: string, payload: UpdateStaffPayload): Promise<void> {
