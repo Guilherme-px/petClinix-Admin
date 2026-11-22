@@ -1,5 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { errorHandler, getErrorMessage } from "../../../infrastructure/http/errorHandler";
+import {
+    errorHandler,
+    getErrorCode,
+    getErrorMessage,
+} from "../../../infrastructure/http/errorHandler";
 import type { AxiosError } from "axios";
 
 describe("errorHandler", () => {
@@ -88,5 +92,45 @@ describe("getErrorMessage", () => {
     it("should handle null or undefined input", () => {
         expect(getErrorMessage(undefined)).toBe("Ocorreu um erro inesperado.");
         expect(getErrorMessage(null)).toBe("Ocorreu um erro inesperado.");
+    });
+
+    describe("getErrorCode", () => {
+        it("should return api errorCode when present", () => {
+            const error = errorHandler({
+                message: "Request failed",
+                response: {
+                    status: 403,
+                    data: {
+                        errorCode: "STAFF_LIMIT_REACHED",
+                        errorMessage: "Limite de funcionários do plano atingido.",
+                    },
+                },
+            } as AxiosError);
+
+            expect(getErrorCode(error)).toBe("STAFF_LIMIT_REACHED");
+        });
+
+        it("should return null when errorCode is missing", () => {
+            const error = errorHandler({
+                message: "Request failed",
+                response: {
+                    status: 500,
+                    data: { message: "Erro genérico do servidor" },
+                },
+            } as AxiosError);
+
+            expect(getErrorCode(error)).toBeNull();
+        });
+
+        it("should return null when error has no data", () => {
+            const error = errorHandler({ message: "Network Error" } as AxiosError);
+
+            expect(getErrorCode(error)).toBeNull();
+        });
+
+        it("should handle null or undefined input", () => {
+            expect(getErrorCode(undefined)).toBeNull();
+            expect(getErrorCode(null)).toBeNull();
+        });
     });
 });
