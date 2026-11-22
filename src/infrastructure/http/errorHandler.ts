@@ -23,6 +23,11 @@ export const errorHandler = (error: unknown): FetchError => {
     return fetchError;
 };
 
+export const getErrorCode = (error: unknown): string | null => {
+    const fetchError = error as FetchError;
+    return fetchError?.data?.errorCode ?? null;
+};
+
 export const getErrorMessage = (
     error: unknown,
     fallback = "Ocorreu um erro inesperado.",
