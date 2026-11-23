@@ -1,6 +1,6 @@
 <template>
     <q-page padding>
-        <ListPageLayout title="Profissionais">
+        <ListPageLayout :title="pageTitle">
             <template #actions>
                 <q-btn
                     unelevated
@@ -122,8 +122,10 @@ import DataTable from "@/components/common/DataTable.vue";
 import ConfirmDialog from "@/components/common/ConfirmDialog.vue";
 import StaffFormDialog from "@/components/forms/StaffFormDialog.vue";
 import { useDataTable } from "@/composables/useDataTable";
+import { useBillingPortal } from "@/composables/useBillingPortal";
+import { useStaffLimit } from "@/composables/useStaffLimit";
 import { container } from "@/infrastructure/container";
-import { getErrorMessage } from "@/infrastructure/http/errorHandler";
+import { getErrorMessage, getErrorCode } from "@/infrastructure/http/errorHandler";
 import type { StaffService } from "@/application/services/staffService";
 import type { StaffMember, RegisterStaffPayload, UpdateStaffPayload } from "@/domain/models/Staff";
 import { staffRoleLabel } from "@/domain/models/Staff";
@@ -131,14 +133,27 @@ import EmptyState from "@/components/common/EmptyState.vue";
 import emptyStaffImage from "@/assets/empty-staff.svg";
 import { formatPhone } from "@/utils/formatters";
 
+const PLAN_LIMIT_ACTIONS: Record<string, string> = {
+    "identity.staff_limit_reached": "Fazer upgrade",
+    "identity.subscription_inactive": "Gerenciar assinatura",
+};
+
 const $q = useQuasar();
 const staffService = container.resolve<StaffService>("StaffService");
+const { openBillingPortal } = useBillingPortal();
+const { staffLimit, load: loadStaffLimit } = useStaffLimit();
 
 const isDeleteOpen = ref(false);
 const selectedStaff = ref<StaffMember | null>(null);
 const isFormOpen = ref(false);
 const isSubmitting = ref(false);
 const isDeleting = ref(false);
+
+const pageTitle = computed(() =>
+    staffLimit.value && staffLimit.value.limit !== null
+        ? `Profissionais (${staffLimit.value.used}/${staffLimit.value.limit})`
+        : "Profissionais",
+);
 
 const columns: QTableColumn[] = [
     { name: "name", label: "Nome", field: "name", align: "left" },
@@ -168,6 +183,7 @@ const table = useDataTable<StaffMember>((params) => staffService.list(params), {
 });
 
 void table.load();
+void loadStaffLimit();
 
 const openCreate = () => {
     selectedStaff.value = null;
@@ -198,7 +214,7 @@ const onDeleteConfirm = async () => {
         await staffService.remove(selectedStaff.value.id);
         isDeleteOpen.value = false;
         $q.notify({ type: "positive", message: "Profissional excluído com sucesso!" });
-        await table.refresh();
+        await Promise.all([table.refresh(), loadStaffLimit()]);
     } catch (error) {
         $q.notify({
             type: "negative",
@@ -207,6 +223,34 @@ const onDeleteConfirm = async () => {
     } finally {
         isDeleting.value = false;
     }
+};
+
+const notifySubmitError = (error: unknown) => {
+    const errorCode = getErrorCode(error);
+    const actionLabel = errorCode ? PLAN_LIMIT_ACTIONS[errorCode] : undefined;
+
+    if (!actionLabel) {
+        $q.notify({
+            type: "negative",
+            message: getErrorMessage(error, "Erro ao salvar profissional."),
+        });
+        return;
+    }
+
+    $q.notify({
+        type: "negative",
+        message: getErrorMessage(error, "Erro ao salvar profissional."),
+        timeout: 10000,
+        actions: [
+            {
+                label: actionLabel,
+                color: "white",
+                handler: () => {
+                    void openBillingPortal();
+                },
+            },
+        ],
+    });
 };
 
 const onFormSubmit = async (payload: RegisterStaffPayload | UpdateStaffPayload) => {
@@ -224,12 +268,9 @@ const onFormSubmit = async (payload: RegisterStaffPayload | UpdateStaffPayload) 
                 ? "Profissional atualizado com sucesso!"
                 : "Profissional criado com sucesso!",
         });
-        await table.refresh();
+        await Promise.all([table.refresh(), loadStaffLimit()]);
     } catch (error) {
-        $q.notify({
-            type: "negative",
-            message: getErrorMessage(error, "Erro ao salvar profissional."),
-        });
+        notifySubmitError(error);
     } finally {
         isSubmitting.value = false;
     }
