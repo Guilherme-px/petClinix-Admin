@@ -42,7 +42,11 @@
 
         <q-separator class="q-my-md" />
         <div class="text-subtitle2 text-grey-7">
-            Alterar Senha (deixe em branco para manter a atual)
+            {{
+                isDemoAccount
+                    ? "Alterar Senha (indisponível na conta de demonstração)"
+                    : "Alterar Senha (deixe em branco para manter a atual)"
+            }}
         </div>
 
         <q-input
@@ -52,6 +56,7 @@
             :type="isPwd ? 'password' : 'text'"
             lazy-rules
             :rules="[optionalPasswordRules]"
+            :disable="isDemoAccount"
         >
             <template v-slot:append>
                 <q-icon
@@ -68,6 +73,7 @@
             :type="isPwd ? 'password' : 'text'"
             lazy-rules
             :rules="[confirmPasswordRules(form.newPassword || '')]"
+            :disable="isDemoAccount"
         />
 
         <div class="row justify-end">
@@ -83,17 +89,18 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch } from "vue";
+import { ref, watch, computed } from "vue";
 import type { User, UpdateAccountPayload } from "@/domain/models/Auth";
 import { useValidations } from "@/composables/useValidations";
 import { useMasks } from "@/composables/useMasks";
+
+const DEMO_ACCOUNT_EMAIL = "user.test@email.com";
 
 const props = defineProps<{ user: User | null; isLoading: boolean }>();
 const emit = defineEmits<{ (e: "submit", payload: Partial<UpdateAccountPayload>): void }>();
 
 const { phoneMask, cpfMask } = useMasks();
-const { required, optionalPasswordRules, confirmPasswordRules, phoneFormat } =
-    useValidations();
+const { required, optionalPasswordRules, confirmPasswordRules, phoneFormat } = useValidations();
 
 const isPwd = ref(true);
 const confirmNewPassword = ref("");
@@ -104,6 +111,8 @@ const form = ref<Partial<UpdateAccountPayload>>({
     userBirthDate: "",
     newPassword: "",
 });
+
+const isDemoAccount = computed(() => props.user?.email?.toLowerCase() === DEMO_ACCOUNT_EMAIL);
 
 watch(
     () => props.user,
