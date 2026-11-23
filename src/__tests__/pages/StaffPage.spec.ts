@@ -1,7 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { mount, flushPromises } from "@vue/test-utils";
 import { QBtn } from "quasar";
 import StaffPage from "../../pages/StaffPage.vue";
+import ListPageLayout from "../../components/common/ListPageLayout.vue";
 import EmptyState from "../../components/common/EmptyState.vue";
 import ConfirmDialog from "../../components/common/ConfirmDialog.vue";
 import StaffFormDialog from "../../components/forms/StaffFormDialog.vue";
@@ -12,10 +13,13 @@ import type {
     UpdateStaffPayload,
     StaffRole,
 } from "../../domain/models/Staff";
+import type { StaffLimit } from "../../domain/models/StaffLimit";
+import type { PortalSession } from "../../domain/models/Billing";
 import {
     createMockStaff,
     createRegisterStaffPayload,
     createPaginatedStaff,
+    createStaffLimit,
 } from "../../test/factories/staffFactory";
 import { QDialogStub, QPageStub, QTooltipStub } from "../../test/helpers/stubs";
 import { screenState } from "../../test/helpers/mockQuasar";
@@ -45,6 +49,8 @@ const getByIdMock = vi.fn<(id: string) => Promise<StaffMember>>();
 const registerMock = vi.fn<(payload: RegisterStaffPayload) => Promise<void>>();
 const updateMock = vi.fn<(id: string, payload: UpdateStaffPayload) => Promise<void>>();
 const removeMock = vi.fn<(id: string) => Promise<void>>();
+const getStaffLimitMock = vi.fn<() => Promise<StaffLimit>>();
+const createPortalSessionMock = vi.fn<(returnUrl: string) => Promise<PortalSession>>();
 
 const mountPage = () =>
     mount(StaffPage, {
@@ -58,12 +64,18 @@ const mountPage = () =>
     });
 
 const setupContainer = (response?: PaginatedResponse<StaffMember>) => {
-    vi.mocked(container.resolve).mockReturnValue({
-        list: listMock,
-        getById: getByIdMock,
-        register: registerMock,
-        update: updateMock,
-        remove: removeMock,
+    vi.mocked(container.resolve).mockImplementation((key: string) => {
+        if (key === "BillingService") {
+            return { createPortalSession: createPortalSessionMock };
+        }
+        return {
+            list: listMock,
+            getById: getByIdMock,
+            register: registerMock,
+            update: updateMock,
+            remove: removeMock,
+            getStaffLimit: getStaffLimitMock,
+        };
     });
 
     listMock.mockResolvedValue(response ?? createPaginatedStaff());
@@ -71,6 +83,8 @@ const setupContainer = (response?: PaginatedResponse<StaffMember>) => {
 
 const findButtonByIcon = (wrapper: ReturnType<typeof mount>, icon: string) =>
     wrapper.findAllComponents(QBtn).find((b) => b.props("icon") === icon);
+
+const originalLocation = window.location;
 
 describe("StaffPage", () => {
     const staff = createMockStaff();
@@ -84,6 +98,12 @@ describe("StaffPage", () => {
         registerMock.mockReset().mockResolvedValue(undefined);
         updateMock.mockReset().mockResolvedValue(undefined);
         removeMock.mockReset().mockResolvedValue(undefined);
+        getStaffLimitMock.mockReset();
+        createPortalSessionMock.mockReset();
+    });
+
+    afterEach(() => {
+        Object.defineProperty(window, "location", { value: originalLocation, configurable: true });
     });
 
     it("should load and render staff on mount", async () => {
@@ -147,6 +167,27 @@ describe("StaffPage", () => {
                 message: "Erro ao carregar profissionais.",
             }),
         );
+    });
+
+    it("should show used and limit in page title when plan has a maximum", async () => {
+        setupContainer();
+        getStaffLimitMock.mockResolvedValue(createStaffLimit({ used: 2, limit: 5 }));
+
+        const wrapper = mountPage();
+        await flushPromises();
+
+        expect(getStaffLimitMock).toHaveBeenCalledWith();
+        expect(wrapper.findComponent(ListPageLayout).props("title")).toBe("Profissionais (2/5)");
+    });
+
+    it("should show page title without counter when plan is unlimited", async () => {
+        setupContainer();
+        getStaffLimitMock.mockResolvedValue(createStaffLimit({ limit: null }));
+
+        const wrapper = mountPage();
+        await flushPromises();
+
+        expect(wrapper.findComponent(ListPageLayout).props("title")).toBe("Profissionais");
     });
 
     it("should open create dialog with null staff when new button is clicked", async () => {
@@ -271,6 +312,113 @@ describe("StaffPage", () => {
             }),
         );
         expect(wrapper.findComponent(StaffFormDialog).props("modelValue")).toBe(true);
+    });
+
+    it("should notify with upgrade action when register fails with staff limit reached", async () => {
+        setupContainer();
+        const wrapper = mountPage();
+        await flushPromises();
+
+        const newButton = wrapper.findAllComponents(QBtn).find((b) => b.props("icon") === "add")!;
+        await newButton.trigger("click");
+
+        registerMock.mockRejectedValueOnce(
+            Object.assign(new Error("Forbidden"), {
+                data: {
+                    errorCode: "identity.staff_limit_reached",
+                    errorMessage: "Limite de profissionais do plano atingido.",
+                },
+            }),
+        );
+
+        await wrapper
+            .findComponent(StaffFormDialog)
+            .vm.$emit("submit", createRegisterStaffPayload());
+        await flushPromises();
+
+        expect(notifyMock).toHaveBeenCalledWith(
+            expect.objectContaining({
+                type: "negative",
+                message: "Limite de profissionais do plano atingido.",
+                timeout: 10000,
+                actions: expect.arrayContaining([
+                    expect.objectContaining({ label: "Fazer upgrade", color: "white" }),
+                ]),
+            }),
+        );
+    });
+
+    it("should open billing portal when the upgrade action handler is invoked", async () => {
+        setupContainer();
+        createPortalSessionMock.mockResolvedValue({
+            portalUrl: "https://billing.stripe.com/session/1",
+        });
+        Object.defineProperty(window, "location", {
+            value: { href: "http://localhost:5173/staff" },
+            configurable: true,
+        });
+
+        const wrapper = mountPage();
+        await flushPromises();
+
+        const newButton = wrapper.findAllComponents(QBtn).find((b) => b.props("icon") === "add")!;
+        await newButton.trigger("click");
+
+        registerMock.mockRejectedValueOnce(
+            Object.assign(new Error("Forbidden"), {
+                data: {
+                    errorCode: "identity.staff_limit_reached",
+                    errorMessage: "Limite de profissionais do plano atingido.",
+                },
+            }),
+        );
+
+        await wrapper
+            .findComponent(StaffFormDialog)
+            .vm.$emit("submit", createRegisterStaffPayload());
+        await flushPromises();
+
+        const notifyPayload = notifyMock.mock.calls[0]![0];
+        const actions = notifyPayload.actions as Array<{ label: string; handler: () => void }>;
+        actions[0]!.handler();
+        await flushPromises();
+
+        expect(createPortalSessionMock).toHaveBeenCalledWith("http://localhost:5173/staff");
+        expect(window.location.href).toBe("https://billing.stripe.com/session/1");
+    });
+
+    it("should notify with manage subscription action when register fails with inactive subscription", async () => {
+        setupContainer();
+        const wrapper = mountPage();
+        await flushPromises();
+
+        const newButton = wrapper.findAllComponents(QBtn).find((b) => b.props("icon") === "add")!;
+        await newButton.trigger("click");
+
+        registerMock.mockRejectedValueOnce(
+            Object.assign(new Error("Forbidden"), {
+                data: {
+                    errorCode: "identity.subscription_inactive",
+                    errorMessage: "Assinatura inativa.",
+                },
+            }),
+        );
+
+        await wrapper
+            .findComponent(StaffFormDialog)
+            .vm.$emit("submit", createRegisterStaffPayload());
+        await flushPromises();
+
+        expect(notifyMock).toHaveBeenCalledWith(
+            expect.objectContaining({
+                type: "negative",
+                message: "Assinatura inativa.",
+                timeout: 10000,
+                actions: expect.arrayContaining([
+                    expect.objectContaining({ label: "Gerenciar assinatura", color: "white" }),
+                ]),
+            }),
+        );
     });
 
     it("should open delete dialog with staff name when delete is clicked", async () => {
@@ -417,3 +565,4 @@ describe("StaffPage", () => {
         expect(notifyMock).not.toHaveBeenCalled();
     });
 });
+
