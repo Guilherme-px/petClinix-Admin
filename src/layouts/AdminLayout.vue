@@ -102,19 +102,14 @@ import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import AppLogo from "@/components/AppLogo.vue";
 import { useAuthStore } from "@/stores/auth";
-import type { BillingService } from "@/application/services/billingService";
-import { container } from "@/infrastructure/container";
-import { getErrorMessage } from "@/infrastructure/http/errorHandler";
-import { useQuasar } from "quasar";
+import { useBillingPortal } from "@/composables/useBillingPortal";
 
 const leftDrawerOpen = ref(false);
-const isOpeningBilling = ref(false);
 
-const $q = useQuasar();
 const authStore = useAuthStore();
 const router = useRouter();
 
-const billingService = container.resolve<BillingService>("BillingService");
+const { isOpening: isOpeningBilling, openBillingPortal } = useBillingPortal();
 
 interface MenuItem {
     label: string;
@@ -160,23 +155,6 @@ const toggleLeftDrawer = () => {
 const handleLogout = () => {
     authStore.logout();
     router.push("/login");
-};
-
-const openBillingPortal = async () => {
-    if (isOpeningBilling.value) return;
-
-    isOpeningBilling.value = true;
-    try {
-        const { portalUrl } = await billingService.createPortalSession(window.location.href);
-        window.location.href = portalUrl;
-    } catch (error) {
-        $q.notify({
-            type: "negative",
-            message: getErrorMessage(error, "Erro ao abrir o portal de assinatura."),
-        });
-    } finally {
-        isOpeningBilling.value = false;
-    }
 };
 </script>
 
